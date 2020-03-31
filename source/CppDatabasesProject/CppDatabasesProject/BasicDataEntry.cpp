@@ -23,9 +23,6 @@ BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxSt
 
 	bSizerInput = new wxBoxSizer(wxVERTICAL);
 
-	//textCtrlInput = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
-	//bSizerInput->Add(textCtrlInput, 0, wxALL | wxEXPAND, 5);
-
 	buttonEnter = new wxButton(this, wxID_ANY, wxT("Enter"), wxDefaultPosition, wxDefaultSize, 0);
 	bSizerInput->Add(buttonEnter, 0, wxALL | wxEXPAND, 5);
 
@@ -78,8 +75,6 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 
 		// Get contents
 		auto studentDetails = tool::getContents(filePath.c_str());
-		wxMessageBox(std::to_string(studentDetails.size()));
-
 
 		// Iterate over the string vector, and set the placeholders to each of the student details
 		std::string resProjName;
@@ -100,7 +95,8 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			(resProjName != "none" && studentDetails[i + 3] == "H") ? mySQL->pstmt->setString(5, studentDetails[i + 4].c_str()) : mySQL->pstmt->setNull(5, sql::DataType::SQLNULL);
 
 			// Execute the statement
-			mySQL->pstmt->execute();
+			if (mySQL->pstmt->execute())
+				wxMessageBox("Failure");
 
 			/* Create a new statement for linking students with their courses */
 			SQL_END
@@ -114,17 +110,20 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			// Set the result to be the last (mostly recently added) result
 			mySQL->res->last();
 			
+			int studentID = mySQL->res->getInt("studentID");
 			// INSERT THE studentCourses data
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses () VALUES (?, ?, ?)");
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
 
-			mySQL->pstmt->setInt(1, mySQL->res->getInt("studentID"));
-			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 5]));
+			mySQL->pstmt->setInt(1, studentID);
+			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 5])); // course1ID
 			mySQL->pstmt->execute();
 
-			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 6].c_str()));
+			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 6])); // cours2ID
 			mySQL->pstmt->execute();
 
 			SQL_END
+
+			wxMessageBox("The students have been successfully stored, and enroled to the their respective courses", "Success", wxICON_INFORMATION);
 		}
 
 	}

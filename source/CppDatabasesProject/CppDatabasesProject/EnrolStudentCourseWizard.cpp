@@ -19,9 +19,8 @@ std::vector<std::string> tool::getContents(const char *filePath) {
 		std::getline(file, value, ','); // Read in a string until a ',' is found
 		boost::algorithm::trim(value); // Remove white space
 		contents.push_back(value);
-		//wxMessageBox(value);
+		wxMessageBox(value);
 	}
-	wxMessageBox(std::to_string(contents.size()));
 	return contents;
 }
 
