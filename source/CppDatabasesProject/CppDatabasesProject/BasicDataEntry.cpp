@@ -79,7 +79,9 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 		// Iterate over the string vector, and set the placeholders to each of the student details
 		std::string resProjName;
 		int numColumns = 7;
+
 		// Start at 7 to skip the column headings
+		wxMessageBox("Hi");
 		for (int i = numColumns; i < studentDetails.size() - numColumns; i+=numColumns) {
 			SQL_START
 
