@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "name": "x64",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../../Libs/wxWidgets/include",
+                "${workspaceFolder}/../../Libs/MySQL/MySQL Server 8.0/include",
+                "${workspaceFolder}/../../Libs/MySQL/Connector C++ 1.1/include",
+                "${workspaceFolder}/../../Libs/Boost/boost_1_55_0",
+                "${workspaceFolder}/../../Libs/wxWidgets/include/msvc"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "WXUSINGDLL",
+                "wxMSVC_VERSION_AUTO",
+                "_CRT_SECURE_NO_WARNINGS"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.16.27023/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64"
+        }
+    ],
+    "version": 4
+}

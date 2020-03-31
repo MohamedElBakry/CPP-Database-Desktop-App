@@ -1,0 +1,51 @@
+
+# Prevent unzipped the unzipped libraries from being pushed
+source/Libs/wxWidgets
+source/Libs/Boost
+source/Libs/MySQL
+
+## C++ ##
+# Prerequisites
+# *.d
+
+# Compiled Object files
+# *.slo
+# *.lo
+# *.o
+# *.obj
+
+# Precompiled Headers
+# *.gch
+# *.pch
+
+# Compiled Dynamic libraries
+# *.so
+# *.dylib
+*.dll
+
+# Compiled Static libraries
+# *.a
+# *.lib
+
+# Executables
+*.exe
+
+# Visual Studio #
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+
+.vs/
+
+# Uncomment if you have tasks that create the project's static files in wwwroot
+#wwwroot/
+
