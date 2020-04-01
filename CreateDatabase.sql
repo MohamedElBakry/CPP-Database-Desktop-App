@@ -62,23 +62,35 @@ CREATE TABLE studentsAssessments (
     studentID INT NOT NULL,
     assessmentID INT NOT NULL,
     mark INT NOT NULL,
-    letterGrade VARCHAR(3) NOT NULL,
+    letterGrade VARCHAR(3),
     concessionalCode CHAR(2),
 
     FOREIGN KEY (studentID) REFERENCES Students(studentID) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (assessmentID) REFERENCES Assessments(assessmentID) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
--- Functions
-DROP FUNCTION IF EXISTS I_SID;
+-- Procedures. 
+    -- Use CALL [ProcedureName];
 
-DELIMITER $$
-CREATE FUNCTION I_SID (fn VARCHAR(35)) 
-RETURNS INT
-DETERMINISTIC
-BEGIN 
-  DECLARE sID INT;
-  SELECT studentID INTO sID FROM students where forename = fn;
-  RETURN sID;
-END$$
+-- Just use SELECT MAX(studentID) FROM Students WHERE forename = ?;
+DELIMITER //
+CREATE PROCEDURE getLastSIDFrom (IN fname VARCHAR(35))
+BEGIN
+    SELECT studentID
+    FROM Students
+    WHERE forename = fname
+    ORDER BY studentID DESC
+    LIMIT 1;
+END//
+
 DELIMITER ;
+
+-- Notable Queries
+
+-- Get Students forename and surname with the courses studied:
+SELECT s.studentID, forename, surname, c.name
+FROM students as s
+INNER JOIN studentscourses as sc
+ON s.studentID = sc.studentID
+INNER JOIN courses as c
+ON c.courseID = sc.courseID

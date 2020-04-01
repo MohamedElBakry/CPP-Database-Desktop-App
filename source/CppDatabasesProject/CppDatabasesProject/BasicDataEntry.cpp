@@ -1,10 +1,11 @@
 #include "BasicDataEntry.h"
 
-//#include "OurSQL.h"
-
+enum fOffset {
+	forename, surname, dob, studyLevel, resProjName, course1ID, course2ID
+};
 BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxString title, wxString instruction, const wxArtID artID,
 	const wxPoint &pos, const wxSize &size, long style) : wxDialog(parent, id, title, pos, size)
-{
+{	
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
 
 	bSizerParent = new wxBoxSizer(wxVERTICAL);
@@ -88,23 +89,24 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			// Prepare an SQL statement for inserting student details
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students (forename, surname, dateOfBirth, studyLevel, resProjName) VALUES (?, ?, ?, ?, ?)");
 
-			mySQL->pstmt->setString(1, studentDetails[i].c_str()); // forename
-			mySQL->pstmt->setString(2, studentDetails[i + 1].c_str()); // surname
-			mySQL->pstmt->setString(3, studentDetails[i + 2].c_str()); // dateOfBirth
-			mySQL->pstmt->setString(4, studentDetails[i + 3].c_str()); // studyLevel
+			mySQL->pstmt->setString(1, studentDetails[i + fOffset::forename ].c_str()); // forename
+			mySQL->pstmt->setString(2, studentDetails[i + fOffset::surname].c_str()); // surname
+			mySQL->pstmt->setString(3, studentDetails[i + fOffset::dob].c_str()); // dateOfBirth
+			mySQL->pstmt->setString(4, studentDetails[i + fOffset::studyLevel].c_str()); // studyLevel
 
-			resProjName = studentDetails[i + 4]; // resProjName. If this student has a research project name, and they're a level H student, set their research project name to be that. Otherwise SQLNULL
+			resProjName = studentDetails[i + fOffset::resProjName]; // resProjName. If this student has a research project name, and they're a level H student, set their research project name to be that. Otherwise SQLNULL
 			(resProjName != "none" && studentDetails[i + 3] == "H") ? mySQL->pstmt->setString(5, studentDetails[i + 4].c_str()) : mySQL->pstmt->setNull(5, sql::DataType::SQLNULL);
 
 			// Execute the statement
 			if (mySQL->pstmt->execute())
 				wxMessageBox("Failure");
 
-			/* Create a new statement for linking students with their courses */
 			SQL_END
 
+			/* Create a new statement for linking students with their courses */
+
 			SQL_START
-				// TODO: SEE THIS PART OF THE PROGRAM FOR ERRORS.
+
 			// Get the student ID
 			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
 			mySQL->pstmt->setString(1, studentDetails[i].c_str()); // set the forename
