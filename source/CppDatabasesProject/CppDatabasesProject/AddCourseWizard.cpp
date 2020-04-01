@@ -222,14 +222,14 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 			BasicDataEntryDialog *assessmentCollector = new BasicDataEntryDialog(this, wxID_ANY, "Course Assessments", "Please enter the following details about the assessment");
 
 			wxDatePickerCtrl *assessmentDeadline = ((wxDatePickerCtrl *)assessmentCollector->createLabelTextFieldPair("Deadline", -1, new wxDatePickerCtrl(assessmentCollector, wxID_ANY)));
-			wxTextCtrl *assessmentWeighting = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting"));
+			wxSpinCtrl *assessmentWeighting = ((wxSpinCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting", -1, new wxSpinCtrl(assessmentCollector, wxID_ANY)));
 			wxTextCtrl *assessmentName = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Name"));
 			assessmentCollector->Show(true);
-
+			
 			// Bind function to get data inputted once enter is clicked
 			assessmentCollector->Bind(wxEVT_BUTTON, [this, assessmentCollector, assessmentName, assessmentWeighting, assessmentDeadline](wxCommandEvent &event) {
 				// Using std::stoi here is especially useful as '9abc' will become just 9.
-				struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), std::stoi(assessmentWeighting->GetValue().ToStdString().c_str()), assessmentDeadline->GetValue().FormatISODate().c_str());
+				struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				this->assessmentsVector.push_back(assessment);
 				assessmentCollector->Show(false);
 				wxMessageBox("Assessment successfully inputted!", "Success");
@@ -321,7 +321,34 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 		event.Skip();
 	};
 
+	auto OnShowRefreshDegrees = [this, mySQL](wxShowEvent &event) {
+		wxArrayString degreeChoicesArray;
+
+		SQL_START
+
+		mySQL->res = mySQL->conn->createStatement()->executeQuery("SELECT degreeID, name FROM degreePrograms");;
+
+		char *bufferDegree = new char[72];
+		// Fill the buffer with the degreeID and degree name, then add the buffer to the array, and finally clear the buffer for reuse.
+		while (mySQL->res->next()) {
+			sprintf(bufferDegree, "%s: %s", mySQL->res->getString("degreeID").c_str(), mySQL->res->getString("name").c_str());
+			degreeChoicesArray.Add(bufferDegree);
+			memset(bufferDegree, 0, sizeof(bufferDegree));
+		}
+
+		SQL_END
+
+
+		// Set the choices available to be the wxArrayString of degrees from the database
+		this->choiceDegrees->Set(degreeChoicesArray);
+
+		// Set a placeholder degree selection
+		this->choiceDegrees->SetSelection(0);
+;		event.Skip();
+	};
+
 	// Function event-binding
+	Bind(wxEVT_SHOW, OnShowRefreshDegrees);
 	Bind(wxEVT_BUTTON, OnAddAssessments, addAssessmentsBtn->GetId());
 	Bind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged, wxID_ANY); // Bind for when the data is filled and we need to begin executing the relevant SQL
 

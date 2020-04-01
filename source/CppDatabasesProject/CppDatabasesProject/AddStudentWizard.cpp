@@ -364,8 +364,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 		event.Skip();
 	};
 
-	auto OnStartUpLoadCourses = [this, mySQL](wxShowEvent &event) {
-		wxMessageBox("OnShow called");
+	this->OnShowRefreshCourses = [this, mySQL](wxShowEvent &event) {
 		wxArrayString refreshedCourses;
 		
 		// Get any courses that may have been added during the apps current session.
@@ -396,11 +395,12 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 	///
 	// Function event-binding
-	Bind(wxEVT_SHOW, OnStartUpLoadCourses, wxID_ANY);
+	Bind(wxEVT_SHOW, OnShowRefreshCourses, wxID_ANY);
 	Bind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged, wxID_ANY);
 }
 
 AddStudentWizard::~AddStudentWizard()
 {
+	Unbind(wxEVT_SHOW, OnShowRefreshCourses, wxID_ANY);
 	m_pages.Clear();
 }

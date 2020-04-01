@@ -31,7 +31,7 @@
 WX_DEFINE_ARRAY_PTR(wxWizardPageSimple*, WizardPages);
 
 #define SQL_START try {
-#define SQL_END } catch (sql::SQLException &e) {wxMessageBox(e.what());}
+#define SQL_END } catch (sql::SQLException &e) { wxMessageBox(e.what()); }
 
 /* Acts as a dictionary or associative array of Button IDs to Panel IDs.
  * Mapping Formula : (ID_ON_BTN + ID_PANELID_START) - 6001, where the ID_PANELID_START is the number of Button IDs + 1

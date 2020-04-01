@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AddCourseWizard.h"
+#include <functional>
 
 
 class AddStudentWizard : public wxWizard
@@ -37,6 +38,9 @@ protected:
 	wxStaticText* m_staticTextMain;
 	wxGauge* m_gauge1;
 	wxStaticText* m_staticTextStatus;
+
+	// Virtual lambda event handlers;
+	std::function<void (wxShowEvent &event)> OnShowRefreshCourses;
 
 	// Virtual event handlers, overide them in your derived class
 	virtual void studyLevelExtra(wxWizardEvent& event) { event.Skip(); }
