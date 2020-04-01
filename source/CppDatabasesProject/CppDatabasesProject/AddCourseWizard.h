@@ -45,6 +45,10 @@ protected:
 	wxGauge* gaugeLoadingBar;
 	wxStaticText* m_staticTextStatus;
 
+	// Lambad function declarations;
+	std::function<void (wxCommandEvent &)> OnAddAssessments;
+	std::function<void (wxWizardEvent &)> OnPageChanged;
+
 	std::vector<Assessment *> assessmentsVector;
 	// Virtual event handlers, overide them in your derived class
 	virtual void studyLevelExtra(wxWizardEvent& event) { event.Skip(); }

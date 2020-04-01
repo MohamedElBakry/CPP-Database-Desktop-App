@@ -211,7 +211,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	/* User defined event functions */
 
 	// Create and customise a dialog box to get the assessment data, and store it in a member vector of this class
-	auto OnAddAssessments = [this, mySQL](wxCommandEvent &event) {
+	OnAddAssessments = [this, mySQL](wxCommandEvent &event) {
 
 		unsigned const int numAssessments = ((wxSpinCtrl *)this->GetWindowChild(ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL))->GetValue();
 		this->assessmentsVector.clear();
@@ -242,7 +242,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	};
 
 	// Check which page we are on. Being on the final page will start the data processing and colllection.
-	auto OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
+	OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
 		if (event.GetPage() == wizPageResult) {
 			std::vector<std::string> splitted;
 			splitted.reserve(3);
