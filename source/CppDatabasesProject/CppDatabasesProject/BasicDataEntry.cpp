@@ -82,7 +82,6 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 		int numColumns = 7;
 
 		// Start at 7 to skip the column headings
-		wxMessageBox("Hi");
 		for (int i = numColumns; i < studentDetails.size() - numColumns; i+=numColumns) {
 			SQL_START
 

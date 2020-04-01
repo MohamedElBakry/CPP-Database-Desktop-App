@@ -156,7 +156,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 	choiceCourses1 = new wxChoice(wizPageAddData, wxID_ANY, wxDefaultPosition, wxDefaultSize, courseChoicesArray, 0);
 	choiceCourses1->SetSelection(0);
-
+	
 	bSizerCourse1->Add(choiceCourses1, 1, wxALL, 5);
 
 
@@ -256,7 +256,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 			std::vector<std::string> courseIDVec;
 			courseIDVec.reserve(2);
-
+			
 			// Prevent the user from continuing if they haven't selected two different courses
 			std::string course1ID(this->choiceCourses1->GetStringSelection());
 			course1ID = boost::split(courseIDVec, course1ID, boost::is_any_of(":"), boost::token_compress_on).at(0);
@@ -264,11 +264,8 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			std::string course2ID(this->choiceCourses2->GetStringSelection());
 			course2ID = boost::split(courseIDVec, course2ID, boost::is_any_of(":"), boost::token_compress_on).at(0);
 
-			//std::string course1ID(1, this->choiceCourses1->GetStringSelection().at(0));
-			//std::string course2ID(1, this->choiceCourses2->GetStringSelection().at(0));
-
 			if (course1ID == course2ID) {
-				wxMessageBox("Please select two different courses before proceeding.", "Course Selection Error", wxICON_EXCLAMATION);
+				wxMessageBox("Please select two different courses before proceeding.", "Invalid Course Selection", wxICON_EXCLAMATION);
 				this->m_gauge1->SetValue(0);
 				return;
 			}
@@ -298,67 +295,64 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 				mySQL->pstmt->setString(5, resProjName.c_str());
 
 			// Execute the Student INSERT and query
-			try {
-				if (!mySQL->pstmt->execute())
-					wxMessageBox("The Student has been added successfully!", "Success");
-				else
-					wxMessageBox("Oops! There was an error. Please try again.", "Failure");
-			}
-			catch (sql::SQLException &e) {
-				wxMessageBox(e.what());
-			}
+			SQL_START
+
+			if (!mySQL->pstmt->execute())
+				wxMessageBox("The Student has been added successfully!", "Success");
+			else
+				wxMessageBox("Oops! There was an error. Please try again.", "Failure");
+
+			SQL_END
 
 			m_gauge1->SetValue(85);
 			/// Link up the student to the courses and degree they have picked
 
 			std::string studentID;
 			// Get the studentID of the most recently added student with the forename above
-			try {
-				mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
-				mySQL->pstmt->setString(1, forename.c_str());
-				mySQL->res = mySQL->pstmt->executeQuery();
-				mySQL->res->last();
-				studentID = mySQL->res->getString("studentID").c_str();
+			
+			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
+			mySQL->pstmt->setString(1, forename.c_str());
+			mySQL->res = mySQL->pstmt->executeQuery();
+			mySQL->res->last();
+			studentID = mySQL->res->getString("studentID").c_str();
 
-				// Insert both courses into the courses table
-				mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
-				mySQL->pstmt->setString(1, studentID.c_str());
-				mySQL->pstmt->setString(2, course1ID.c_str());
-				mySQL->pstmt->execute();
-				// Just change the courseID and execute the statement again
-				mySQL->pstmt->setString(2, course2ID.c_str());
-				mySQL->pstmt->execute();
-			}
-			catch (sql::SQLException &e) {
-				wxMessageBox(e.what());
-			}
+			// Insert both courses into the courses table
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
+			mySQL->pstmt->setString(1, studentID.c_str());
+			mySQL->pstmt->setString(2, course1ID.c_str());
+			mySQL->pstmt->execute();
+			// Just change the courseID and execute the statement again
+			mySQL->pstmt->setString(2, course2ID.c_str());
+			mySQL->pstmt->execute();
 
 			/// Link up the student to the degree of one course if not both courses
 			int course1DegreeID;
 			int course2DegreeID;
+
 			SQL_START
-				mySQL->pstmt = mySQL->conn->prepareStatement("SELECT degreeID FROM courses WHERE courseID=? OR courseID=?");
-				mySQL->pstmt->setString(1, course1ID.c_str());
-				mySQL->pstmt->setString(2, course2ID.c_str());
-				mySQL->res = mySQL->pstmt->executeQuery();
 
-				mySQL->res->next(); // Move the resultSet pointer from the column name to the first result.
-				course1DegreeID = mySQL->res->getInt("degreeID");
+			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT degreeID FROM courses WHERE courseID=? OR courseID=?");
+			mySQL->pstmt->setString(1, course1ID.c_str());
+			mySQL->pstmt->setString(2, course2ID.c_str());
+			mySQL->res = mySQL->pstmt->executeQuery();
 
-				mySQL->res->next(); // Move the resultSet pointer from the column name to the second result.
-				course2DegreeID = mySQL->res->getInt("degreeID");
+			mySQL->res->next(); // Move the resultSet pointer from the column name to the first result.
+			course1DegreeID = mySQL->res->getInt("degreeID");
 
-				// If both courses belong to the same degree program, then only link up the student and degree once
-				mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsDegrees (studentID, degreeID) VALUES (?, ?)");
-				mySQL->pstmt->setString(1, studentID.c_str());
-				mySQL->pstmt->setInt(2, course1DegreeID);
-				mySQL->pstmt->execute();
+			mySQL->res->next(); // Move the resultSet pointer from the column name to the second result.
+			course2DegreeID = mySQL->res->getInt("degreeID");
+
+			// If both courses belong to the same degree program, then only link up the student and degree once
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsDegrees (studentID, degreeID) VALUES (?, ?)");
+			mySQL->pstmt->setString(1, studentID.c_str());
+			mySQL->pstmt->setInt(2, course1DegreeID);
+			mySQL->pstmt->execute();
 				
-				if (course1DegreeID != course2DegreeID) {
-					mySQL->pstmt->setInt(2, course2DegreeID);
-					mySQL->pstmt->execute();
-					wxMessageBox("This student is enrolled as a Combined Honours student, as the 2 selected courses do not belong to the same degree.", "Degree Notification");
-				}
+			if (course1DegreeID != course2DegreeID) {
+				mySQL->pstmt->setInt(2, course2DegreeID);
+				mySQL->pstmt->execute();
+				wxMessageBox("This student is enrolled as a Combined Honours student, as the 2 selected courses do not belong to the same degree.", "Degree Notification");
+			}
 
 			SQL_END
 
@@ -369,13 +363,44 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 		event.Skip();
 	};
+
+	auto OnStartUpLoadCourses = [this, mySQL](wxShowEvent &event) {
+		wxMessageBox("OnShow called");
+		wxArrayString refreshedCourses;
+		
+		// Get any courses that may have been added during the apps current session.
+		SQL_START
+
+		// Execute the query and store the results
+		mySQL->res = mySQL->conn->createStatement()->executeQuery("SELECT courseID, name FROM courses");
+
+		char *bufferCourse = new char[72];
+		// Fill the buffer with the courseID and course name, then add the buffer to the wxArrayString, and finally clear the buffer for reuse.
+		while (mySQL->res->next()) {
+			sprintf(bufferCourse, "%s: %s", mySQL->res->getString("courseID").c_str(), mySQL->res->getString("name").c_str());
+			refreshedCourses.Add(bufferCourse);
+			memset(bufferCourse, 0, sizeof(bufferCourse));
+		}
+		SQL_END
+
+		// Set the Drop down lists to the new wxArrayString
+		this->choiceCourses1->Set(refreshedCourses);
+		this->choiceCourses2->Set(refreshedCourses);
+
+		// Set the placeholder selection to be indexes 1 and 2 of the refreshedCourses wxArrayString
+		this->choiceCourses1->SetSelection(0);
+		this->choiceCourses2->SetSelection(1);
+		
+		event.Skip();
+	};
+
+	///
 	// Function event-binding
+	Bind(wxEVT_SHOW, OnStartUpLoadCourses, wxID_ANY);
 	Bind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged, wxID_ANY);
-	// Connect Events
 }
 
 AddStudentWizard::~AddStudentWizard()
 {
-	// Disconnect Events
 	m_pages.Clear();
 }
