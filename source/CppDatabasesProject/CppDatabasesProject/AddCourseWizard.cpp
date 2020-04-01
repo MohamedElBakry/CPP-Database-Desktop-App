@@ -344,7 +344,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 
 		// Set a placeholder degree selection
 		this->choiceDegrees->SetSelection(0);
-;		event.Skip();
+		event.Skip();
 	};
 
 	// Function event-binding
@@ -362,6 +362,8 @@ AddCourseWizard::~AddCourseWizard()
 {
 	// Disconnect Events
 	this->Disconnect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra));
+	// TODO: UNBIND LAMBDAS
+	//Unbind();
 	assessmentsVector.clear();
 	m_pages.Clear();
 }
