@@ -31,7 +31,7 @@ public:
 			conn->setSchema(databaseName);
 		}
 		catch (sql::SQLException &e) {
-			wxMessageBox(e.what(), "Database Error: Please Activate the Server", wxICON_ERROR);
+			wxMessageBox(e.what(), "Database Error", wxICON_ERROR);
 		}
 	}
 

@@ -353,17 +353,17 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	Bind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged, wxID_ANY); // Bind for when the data is filled and we need to begin executing the relevant SQL
 
 	// Connect Events
-	this->Connect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra)); // Connected event for when allowi
-
-	//this->RunWizard(wizPageWelcome);
+	this->Connect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra)); 
 }
 
 AddCourseWizard::~AddCourseWizard()
 {
+	// Unbind events
+	Unbind(wxEVT_BUTTON, OnAddAssessments);
+	Unbind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged);
+
 	// Disconnect Events
 	this->Disconnect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra));
-	// TODO: UNBIND LAMBDAS
-	//Unbind();
 	assessmentsVector.clear();
 	m_pages.Clear();
 }

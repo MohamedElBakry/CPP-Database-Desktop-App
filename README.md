@@ -5,9 +5,12 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 ## Self-Notes
 1. Clear form on load?
+2. Read in studentID too from enrol.txt, or generate on INSERT with AUTO_INCREMENT?
+3. Explore progression codes...
 
 ## TODO 
-2. Edit student marks:
-    Table of students:
-        Click on a student ->
-            Table of their edittable marks...
+1. Edit student course marks:
+2. Display student transcript for a specified student.
+    a. Course names, Level and Assessment Details with Marks (courses.name, courses.level, assessment.name, assessment.weighting, students.assessments.mark) ?
+    b. With the Calculated overall aggregate for each level completed (studentsCourses.letterGrade)?
+    c. With the Calculated overall degree classification if all levels completed  (studentsDegrees.overallGrade) if Level C, I and H courses entries found 
