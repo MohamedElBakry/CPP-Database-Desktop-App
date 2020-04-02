@@ -17,21 +17,17 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 7. StudentID foreign key: ON DELETE CASCADE instead of RESTRICT?
 
+8. Remove boost::token_compress_on from boost::split
+
 ## TODO 
 1. Edit student course marks:
     Get Student ID and registered courses with fields shown below
     On CourseSelection event, show assessments for that course only...
     Have a Submit Changes button and ensure fields are not empty.
 
-StudentID:
-    CourseID: 
-        -> Mark
-        -> Progression Code:
-        AssessmentID:
-            -> Mark
-            -> Concessional Code
-
 2. Display student transcript for a specified student.
     a. Course names, Level and Assessment Details with Marks (courses.name, courses.level, assessment.name, assessment.weighting, students.assessments.mark) ?
     b. With the Calculated overall aggregate for each level completed (studentsCourses.letterGrade)?
     c. With the Calculated overall degree classification if all levels completed  (studentsDegrees.overallGrade) if Level C, I and H courses entries found 
+
+3. Create SQL Trigger for ON INSERT assessment mark OR course mark, generate and INSERT letterGrade

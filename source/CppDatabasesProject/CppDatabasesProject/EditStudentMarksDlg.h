@@ -28,7 +28,7 @@ protected:
 	wxStaticText* m_staticTextCourse;
 	wxChoice* m_choiceCourses;
 	wxStaticText* m_staticTextMark;
-	wxSpinCtrl* m_spinCtrlMark;
+	wxSpinCtrl* m_spinCtrlCourseMarks;
 	wxStaticText* m_staticTextPrgC;
 	wxTextCtrl* m_textCtrlPrgC;
 	wxStaticText* m_staticTextAs;
@@ -37,9 +37,9 @@ protected:
 	wxSpinCtrl* m_spinCtrlAsMark;
 	wxStaticText* m_staticTextConc;
 	wxChoice* m_choiceConc;
-	wxStdDialogButtonSizer* m_sdbSizer1;
-	wxButton* m_sdbSizer1OK;
-	wxButton* m_sdbSizer1Cancel;
+	wxStdDialogButtonSizer* m_sdbSizer;
+	wxButton* m_sdbSizerOK;
+	wxButton* m_sdbSizerCancel;
 
 	int studentID;
 

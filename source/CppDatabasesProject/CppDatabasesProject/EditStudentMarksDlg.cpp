@@ -33,8 +33,9 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	m_staticTextMark->Wrap(-1);
 	bSizerMark->Add(m_staticTextMark, 1, wxALL, 5);
 
-	m_spinCtrlMark = new wxSpinCtrl(sbSizerCourse->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
-	bSizerMark->Add(m_spinCtrlMark, 1, wxALL, 5);
+	// Course marks are calculated through assessments
+	//m_spinCtrlCourseMarks = new wxSpinCtrl(sbSizerCourse->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS);
+	//bSizerMark->Add(m_spinCtrlCourseMarks, 1, wxALL, 5);
 
 
 	sbSizerCourse->Add(bSizerMark, 1, wxEXPAND, 5);
@@ -72,7 +73,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	m_choiceAs = new wxChoice(sbSizerAs->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceAsChoices, 0);
 	m_choiceAs->SetSelection(0);
 	bSizerAs->Add(m_choiceAs, 1, wxALL, 5);
-
+	
 
 	sbSizerAs->Add(bSizerAs, 1, wxEXPAND, 5);
 
@@ -83,7 +84,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	m_staticTextAsMark->Wrap(-1);
 	bSizerAsMark->Add(m_staticTextAsMark, 1, wxALL, 5);
 
-	m_spinCtrlAsMark = new wxSpinCtrl(sbSizerAs->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxSP_WRAP, 0, 100, 0);
+	m_spinCtrlAsMark = new wxSpinCtrl(sbSizerAs->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxSP_WRAP);
 	bSizerAsMark->Add(m_spinCtrlAsMark, 1, wxALL, 5);
 
 
@@ -99,6 +100,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	wxString m_choiceConcChoices[] = { "None", wxT("NS: Non Submission"), wxT("M: Mitigating circumstances"), wxT("PL: Plagiarism"), wxT("FL: Late submission"), wxT("AO: Attendance Only"), wxT("EX: Extension given") };
 	int m_choiceConcNChoices = sizeof(m_choiceConcChoices) / sizeof(wxString);
 	m_choiceConc = new wxChoice(sbSizerAs->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceConcNChoices, m_choiceConcChoices, 0);
+	m_choiceConc->SetSelection(0);
 	bSizerConc->Add(m_choiceConc, 1, wxALL, 5);
 
 
@@ -107,14 +109,16 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 	bSizerParent->Add(sbSizerAs, 1, wxEXPAND, 5);
 
-	m_sdbSizer1 = new wxStdDialogButtonSizer();
-	m_sdbSizer1OK = new wxButton(this, wxID_OK);
-	m_sdbSizer1->AddButton(m_sdbSizer1OK);
-	m_sdbSizer1Cancel = new wxButton(this, wxID_CANCEL);
-	m_sdbSizer1->AddButton(m_sdbSizer1Cancel);
-	m_sdbSizer1->Realize();
+	m_sdbSizer = new wxStdDialogButtonSizer();
+	m_sdbSizerOK = new wxButton(this, wxID_OK);
+	m_sdbSizer->AddButton(m_sdbSizerOK);
+	m_sdbSizerCancel = new wxButton(this, wxID_CANCEL);
+	m_sdbSizer->AddButton(m_sdbSizerCancel);
+	m_sdbSizer->Realize();
 
-	bSizerParent->Add(m_sdbSizer1, 0, wxALIGN_CENTER_HORIZONTAL, 5);
+	
+
+	bSizerParent->Add(m_sdbSizer, 0, wxALIGN_CENTER_HORIZONTAL, 5);
 
 
 	this->SetSizer(bSizerParent);
@@ -124,16 +128,15 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	this->Centre(wxBOTH);
 
 	MySQL *mySQL = new MySQL();
-	wxNumberEntryDialog *studentIDEntry = new wxNumberEntryDialog(this, "Please enter the student's ID you wish to edit", "Student Edit", "Caption", 1, 1, 100, wxDefaultPosition);
+	wxNumberEntryDialog *studentIDEntry = new wxNumberEntryDialog(this, "Please enter the student's ID you wish to edit", "Student ID", "Edit Student Marks", 1, 1, 2147483647);
 	
 	// Lambda functions to be bound to events
-	auto OnShow = [this, mySQL, studentIDEntry](wxInitDialogEvent &event) {
-		wxMessageBox("OnShowEditStudent");
-		int studentID = 61;
-		this->studentID = studentID;
-		/*	studentIDEntry->ShowModal();
-		wxMessageBox(std::to_string(studentID));*/
+	auto OnInitFnc = [this, mySQL, studentIDEntry](wxInitDialogEvent &event) {
 
+		studentIDEntry->ShowModal(); // Show the Dialog
+		int studentID = studentIDEntry->GetValue(); // Store the value
+		
+		this->studentID = studentID;
 		
 		// Get the student's current enroled course and asseessment
 		SQL_START
@@ -151,37 +154,26 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 			memset(bufferCourses, 0, sizeof(bufferCourses));
 		}
 
-		this->m_choiceCourses->Set(coursesArray);
-
-
 		// Set the drop down lists to be of the enroled courses and asessments
-
-		// Display assessments based on the course selected
-
-		// If OK is clicked, get the data from the fields and update the database
+		this->m_choiceCourses->Set(coursesArray);
 		SQL_END
-
+			
 		event.Skip();
 	};
 
-	// Function event binds
-
-	// Bind the courses
-	m_choiceCourses->Bind(wxEVT_COMMAND_CHOICE_SELECTED, [this](wxCommandEvent &event) {
-		wxMessageBox("course choice made");
+	// Display assessments based on the course selected
+	auto OnCourseSelected = [this](wxCommandEvent &event) {
 		std::vector<std::string> splitCourse;
 
 		// Get the selected course
 		std::string selectedCourse = event.GetString().ToStdString();
-		wxMessageBox(selectedCourse);
 
 		// Get the courseID
-		int courseID = std::stoi(boost::split(splitCourse, selectedCourse, boost::is_any_of(":"), boost::token_compress_on).at(0));
-		wxMessageBox(std::to_string(courseID));
+		int courseID = std::stoi(boost::split(splitCourse, selectedCourse, boost::is_any_of(":")).at(0));
 		SQL_START
 
 			//Get the assessments of that course for that student
-		MySQL *mySQL = new MySQL();
+			MySQL *mySQL = new MySQL();
 
 		mySQL->pstmt = mySQL->conn->prepareStatement("CALL getAssessmentsOfStudent(?, ?)");
 		mySQL->pstmt->setInt(1, this->studentID);
@@ -195,18 +187,69 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		while (mySQL->res->next()) {
 			sprintf(bufferAsessment, "%s: %s", mySQL->res->getString("assessmentID").c_str(), mySQL->res->getString("name").c_str());
 			assessmentsChoicesArray.Add(bufferAsessment);
-			wxMessageBox(bufferAsessment);
 			memset(bufferAsessment, 0, sizeof(bufferAsessment));
 		}
 
 		this->m_choiceAs->Set(assessmentsChoicesArray);
+		this->m_choiceAs->SetSelection(0);
 		SQL_END
 
 		event.Skip();
-	}, wxID_ANY);
+	};
+
+	// If OK is clicked, get the data from the fields and update the database
+	auto OnOKClicked = [this, mySQL](wxCommandEvent &event) {
+		std::vector<std::string> buffer;
+		// Get
+		// Course ID
+		// Course Marks
+		// Progression Code
+		std::string selectedCourseChoice(this->m_choiceCourses->GetStringSelection());
+
+		std::string courseID = boost::split(buffer, selectedCourseChoice, boost::is_any_of(":")).at(0);
+		//int courseMarks = this->m_spinCtrlCourseMarks->GetValue();
+		std::string progressionCode(this->m_textCtrlPrgC->GetValue());
+
+		// Assessment ID
+		// Asessment Marks
+		// Concessional Codes
+		std::string selectedAsessmentChoice(this->m_choiceAs->GetStringSelection());
+		std::string assessmentID = boost::split(buffer, selectedAsessmentChoice, boost::is_any_of(":")).at(0);
+		int assessmentMark = this->m_spinCtrlAsMark->GetValue();
+		std::string concessionalCode(this->m_choiceConc->GetStringSelection()); // TODO split this and get first 2 letters.
+
+		SQL_START
+		// TODO: Allow Trigger to run and convert numerical mark into letter grade
+		// TODO: Allow another Trigger to run and generate letter grade for course if all assessments are marked
+
+		// INSERT course data into studentsCourse 
+		mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
+		mySQL->pstmt->setInt(1, this->studentID);
+		mySQL->pstmt->setString(2, courseID.c_str());
+		mySQL->pstmt->execute();
+
+		// INSERT course data into studentsAssessment
+		mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsAssessments (studentID, asessmentID, mark, concessionalCode) VALUES (?, ?, ?, ?)");
+		mySQL->pstmt->setInt(1, this->studentID);
+		mySQL->pstmt->setString(2, assessmentID.c_str());
+		mySQL->pstmt->setInt(3, assessmentMark);
+		mySQL->pstmt->setInt(4, this->studentID);
 
 
-	Bind(wxEVT_INIT_DIALOG, OnShow);
+		SQL_END
+		wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
+		event.Skip();
+	};
+
+	/* Function event binds */
+
+	// Bind the courses
+	m_choiceCourses->Bind(wxEVT_COMMAND_CHOICE_SELECTED, OnCourseSelected, wxID_ANY);
+
+	// Bind this lambda function to run when this dialog is run
+	Bind(wxEVT_INIT_DIALOG, OnInitFnc);
+
+	Bind(wxEVT_BUTTON, OnOKClicked, wxID_OK);
 
 
 
