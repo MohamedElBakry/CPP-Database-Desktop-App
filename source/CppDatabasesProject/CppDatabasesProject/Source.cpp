@@ -32,63 +32,11 @@ public:
 	void OnExit(wxCloseEvent &event);
 	
 	virtual bool OnInit() {
-		//wxMessageBox("Hello! *Compiled from the command line*", "Welcome", wxICON_INFORMATION);
-		//wxMessageBox("Hey there!");
-
-
-		//std::ifstream file("../../../enrol.csv"); // declare file stream:
-		//std::string value;
-		//std::vector<std::string> values;
-		//while (file.good())
-		//{
-		//	getline(file, value, ','); // read a string until next comma:
-		//	boost::algorithm::trim(value);
-		//	wxMessageBox(std::string(value)); // display value removing the first and the last character from it
-		//	values.push_back(std::string(value));
-		//}
-
 		HomeFrame *frame = new HomeFrame(NULL, wxID_ANY, "LHU Database System", wxDefaultPosition, wxSize(800, 600));
-		//frame->SetIcon(wxIcon(std::to_string(wxICON_INFORMATION)));
-
-		frame->Show(true);
 
 		/* Set the size of the frame to the size of the panel inside it */
 		frame->Fit();
-
-		//mysql_close(conn);
-	//	try {
-
-	//		sql::Driver *driver;
-	//		sql::Connection *conn;
-	//		sql::Statement *stmt;
-	//		sql::ResultSet *res;
-	//		sql::PreparedStatement *pstmt;
-
-	//		driver = get_driver_instance();
-	//		conn = driver->connect("tcp://localhost:3306", "root", "root");
-	//		/* Connect to the MySQL test database */
-	//		conn->setSchema("lhu_db");
-
-	//		/* Make a statment */
-	//		/*stmt = conn->createStatement();
-	//		stmt->executeQuery("INSERT INTO Students (forename, surname, dateOfBirth, studyLevel) VALUES ('His', 'Mann', DATE(NOW()), 'I')");*/
-
-	//		pstmt = conn->prepareStatement("INSERT INTO Students (forename, surname, dateOfBirth, studyLevel) VALUES (?, ?, ?, ?)");
-	//		pstmt->setString(1, "Jim");
-	//		pstmt->setString(2, "Jimbo");
-	//		pstmt->setString(3, "2010-11-21");
-	//		pstmt->setString(4, "C");
-
-	//		pstmt->executeUpdate();
-
-
-	//	}
-	//	catch (sql::SQLException &e) {
-	//		// Often, the executed query is valid but you must 'catch' an exception regardless to allow the program to run.
-	//		wxMessageBox(e.what());
-	//	}
-
-	//	return 0;
+		frame->Show(true);
 
 		/* LIST CTRL TESTS */
 	//	dlg = new BasicDataEntryDialog(NULL);
