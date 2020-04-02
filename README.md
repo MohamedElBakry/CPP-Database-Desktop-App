@@ -6,7 +6,9 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 ## Self-Notes
 1. Clear form on load?
 2. Read in studentID too from enrol.txt, or generate on INSERT with AUTO_INCREMENT?
-3. Explore progression codes...
+3. Explore progression codes...#
+4. Prevent submission of any fields with empty          spaces      ?
+
 
 ## TODO 
 1. Edit student course marks:

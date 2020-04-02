@@ -61,7 +61,7 @@ CREATE TABLE studentsCourses (
 CREATE TABLE studentsAssessments (
     studentID INT NOT NULL,
     assessmentID INT NOT NULL,
-    mark INT NOT NULL,
+    mark INT,
     letterGrade VARCHAR(3),
     concessionalCode CHAR(2),
 
@@ -94,3 +94,21 @@ INNER JOIN studentscourses as sc
 ON s.studentID = sc.studentID
 INNER JOIN courses as c
 ON c.courseID = sc.courseID
+
+-- Get student details with courses and assessment details. adjust fields after SELECT
+SELECT assessments.assessmentID
+FROM students
+INNER JOIN studentscourses
+ON students.studentID = studentscourses.studentID
+INNER JOIN assessments
+ON assessments.courseID = studentscourses.courseID
+
+-- INSERT 
+INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID)
+SELECT s.studentID, a.assessmentID
+FROM Students as S
+INNER JOIN studentsCourses as sC
+ON S.studentID = sC.studentID
+INNER JOIN assessments as a
+ON a.courseID = sC.courseID
+WHERE S.studentID = ?;

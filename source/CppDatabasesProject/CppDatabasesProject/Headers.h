@@ -42,7 +42,7 @@ enum ID {
 
 	ID_ON_BTN_START,
 
-	// IDs which assigned buttons will open wxWizards
+	// IDs whose assigned buttons will open wxWizards
 	ID_ON_HOME_BTN,
 	ID_ON_STUDENT_ENROL_BTN,
 	ID_ON_ADD_STUDENT_BTN,
@@ -90,7 +90,6 @@ enum ID {
 
 namespace tool {
 	wxWindow *getCorrespondingWindow(const wxCommandEvent &event, wxWindow *callingObject);
-
 	std::vector<std::string> getContents(const char* filePath);
 
 }

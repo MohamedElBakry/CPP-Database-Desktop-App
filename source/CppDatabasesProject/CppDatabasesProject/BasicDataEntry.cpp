@@ -47,7 +47,13 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 
 	MySQL *mySQL = new MySQL();
 	int thisID = this->GetId();
+
 	if (thisID == ID_ADD_DEGREE_DLG) {
+		if (((wxTextCtrl *)this->GetWindowChild(ID_DEGREE_DLG_NAME))->IsEmpty()) {
+			wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+			event.Skip();
+			return;
+		}
 		SQL_START
 			// Create the prepared statement
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO degreePrograms (name, startDate, endDate) VALUES (?, ?, ?)");
@@ -71,6 +77,13 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 		wxMessageBox("Enroling via text file now...");
 		// Get text file path
 		wxFilePickerCtrl *picker = (wxFilePickerCtrl *) this->GetWindowChild(ID_ENROL_STUDENTS_TXT_FILEPICKER);
+
+		if (picker->GetTextCtrl()->IsEmpty()) {
+			wxMessageBox("Please select a valid file path", "Invalid File Path", wxICON_EXCLAMATION);
+			event.Skip();
+			return;
+		}
+
 		std::string filePath(picker->GetTextCtrlValue());
 		//wxMessageBox(filePath);
 
@@ -122,6 +135,21 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			mySQL->pstmt->execute();
 
 			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 6])); // cours2ID
+			mySQL->pstmt->execute();
+
+
+			// Enrol the students to the assessments of the courses selected too
+
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID) \
+			SELECT S.studentID, A.assessmentID \
+			FROM Students as S \
+			INNER JOIN studentsCourses as sC \
+			ON S.studentID = sC.studentID \
+			INNER JOIN Assessments as A \
+			ON a.courseID = sC.courseID \
+			WHERE S.studentID = ?;");
+
+			mySQL->pstmt->setInt(1, studentID);
 			mySQL->pstmt->execute();
 
 			SQL_END

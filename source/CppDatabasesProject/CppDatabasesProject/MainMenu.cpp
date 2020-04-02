@@ -79,13 +79,6 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	BasicDataEntryDialog *addDegreeDlg = new BasicDataEntryDialog(this, ID_ADD_DEGREE_DLG, "Add a Degree Program");
 	addDegreeDlg->staticTextMessage->SetLabel(dialogAction("Degree Program's name", "add it"));
 
-
-	//wxComboBox *studyLevels = new wxComboBox(addDegreeDlg, -1, "C", wxDefaultPosition, wxDefaultSize);
-	//studyLevels->Append("C");
-	//studyLevels->Append("I");
-	//studyLevels->Append("H");
-	//addDegreeDlg->createLabelTextFieldPair("Study Level", -1, studyLevels);
-
 	addDegreeDlg->createLabelTextFieldPair("End Date", -1, new wxDatePickerCtrl(addDegreeDlg, ID_DEGREE_DLG_ENDDATE));
 	addDegreeDlg->createLabelTextFieldPair("Start Date", -1, new wxDatePickerCtrl(addDegreeDlg, ID_DEGREE_DLG_STARTDATE));
 	addDegreeDlg->createLabelTextFieldPair("Degree Name", ID_DEGREE_DLG_NAME);

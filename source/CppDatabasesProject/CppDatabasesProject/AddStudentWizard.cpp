@@ -254,6 +254,12 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 		// If this is the final page, consider the user done, and begin parsing the data to insert into the database.
 		if (event.GetPage() == this->wizPageResult) {
 
+			if (this->m_textCtrlFN->IsEmpty() || this->m_textCtrlSN->IsEmpty()) {
+				wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+				this->m_gauge1->SetValue(0);
+				return;
+			}
+
 			std::vector<std::string> courseIDVec;
 			courseIDVec.reserve(2);
 			
@@ -282,6 +288,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			while (resProjName == "" && studyLevel == "H")
 				resProjName = wxGetTextFromUser("Please Enter your Research Project Title", "Level H Student Requirement").ToStdString();
 
+			SQL_START
 			// Insert the data into the prepared statement
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students (forename, surname, dateOfBirth, studyLevel, resProjName) VALUES (?, ?, ?, ?, ?)");
 			mySQL->pstmt->setString(1, forename.c_str());
@@ -295,8 +302,6 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 				mySQL->pstmt->setString(5, resProjName.c_str());
 
 			// Execute the Student INSERT and query
-			SQL_START
-
 			if (!mySQL->pstmt->execute())
 				wxMessageBox("The Student has been added successfully!", "Success");
 			else
@@ -309,7 +314,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 			std::string studentID;
 			// Get the studentID of the most recently added student with the forename above
-			
+			SQL_START
 			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
 			mySQL->pstmt->setString(1, forename.c_str());
 			mySQL->res = mySQL->pstmt->executeQuery();
@@ -324,7 +329,25 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			// Just change the courseID and execute the statement again
 			mySQL->pstmt->setString(2, course2ID.c_str());
 			mySQL->pstmt->execute();
+			SQL_END
+			/// Link up the student to the assessments of the courses they have picked
+			
+			// Prepare the statement. Here we add link the student with the assessments that belong to the courses they are enrolled on.
+			SQL_START
 
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID) \
+				SELECT S.studentID, A.assessmentID \
+				FROM Students as S \
+				INNER JOIN studentsCourses as sC \
+				ON S.studentID = sC.studentID \
+				INNER JOIN Assessments as A \
+				ON a.courseID = sC.courseID \
+				WHERE S.studentID = ?;");
+
+			mySQL->pstmt->setString(1, studentID.c_str());
+			mySQL->pstmt->execute();
+			
+			SQL_END
 			/// Link up the student to the degree of one course if not both courses
 			int course1DegreeID;
 			int course2DegreeID;

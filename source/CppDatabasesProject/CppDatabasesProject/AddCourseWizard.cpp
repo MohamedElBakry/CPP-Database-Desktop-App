@@ -228,6 +228,13 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 			
 			// Bind function to get data inputted once enter is clicked
 			assessmentCollector->Bind(wxEVT_BUTTON, [this, assessmentCollector, assessmentName, assessmentWeighting, assessmentDeadline](wxCommandEvent &event) {
+
+				if (assessmentName->IsEmpty() || assessmentWeighting->GetValue() == 0) {
+					wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+					event.Skip();
+					return;
+				}
+
 				// Using std::stoi here is especially useful as '9abc' will become just 9.
 				struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				this->assessmentsVector.push_back(assessment);
@@ -244,9 +251,16 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	// Check which page we are on. Being on the final page will start the data processing and colllection.
 	OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
 		if (event.GetPage() == wizPageResult) {
+			if (this->courseNameTextCtrl->IsEmpty()) {
+				wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+				event.Skip();
+				return;
+			}
+
 			std::vector<std::string> splitted;
 			splitted.reserve(3);
 
+			// Get the sum of the assessment weights, and take preventative action if the sum is not 100
 			int sumOfWeights = 0;
 			std::for_each(this->assessmentsVector.begin(), this->assessmentsVector.end(), [&sumOfWeights](Assessment *assessment) {
 				sumOfWeights += assessment->weighting;
