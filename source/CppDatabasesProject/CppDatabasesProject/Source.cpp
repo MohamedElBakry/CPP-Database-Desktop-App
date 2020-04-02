@@ -1,10 +1,6 @@
 //#include "Headers.h"
 //#include <mysql.h>
 
-#include <string>
-
-#include <iostream>
-#include <sstream>
 #include "HomeFrame.h"
 
 //#include "OurSQL.h"

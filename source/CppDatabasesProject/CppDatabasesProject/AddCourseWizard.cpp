@@ -251,14 +251,16 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	// Check which page we are on. Being on the final page will start the data processing and colllection.
 	OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
 		if (event.GetPage() == wizPageResult) {
+			std::vector<std::string> splitted;
+			splitted.reserve(3);
+
+			
 			if (this->courseNameTextCtrl->IsEmpty()) {
 				wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
 				event.Skip();
+				this->gaugeLoadingBar->SetValue(0);
 				return;
 			}
-
-			std::vector<std::string> splitted;
-			splitted.reserve(3);
 
 			// Get the sum of the assessment weights, and take preventative action if the sum is not 100
 			int sumOfWeights = 0;

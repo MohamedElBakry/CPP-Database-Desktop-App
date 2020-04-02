@@ -39,6 +39,9 @@
     <ClCompile Include="AddCourseWizard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EditStudentMarksDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AddCourseWizard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditStudentMarksDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

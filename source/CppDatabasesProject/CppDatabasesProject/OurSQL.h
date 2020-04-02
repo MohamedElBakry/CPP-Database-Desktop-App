@@ -12,7 +12,7 @@
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
 
-/* Class OurSQL */
+/* Class MySQL */
 class MySQL
 {
 

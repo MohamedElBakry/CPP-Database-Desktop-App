@@ -1,3 +1,4 @@
+#include "EditStudentMarksDlg.h"
 #include "MainMenu.h"
 #include <wx/combobox.h>
 
@@ -14,13 +15,15 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	wxBoxSizer* courseOptionsBSizerInner = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* bSizerInnerOtherOptions = new wxBoxSizer(wxVERTICAL);
 
-	m_addStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_ADD_STUDENT_BTN, wxT("Add Student"), wxDefaultPosition, wxDefaultSize, 0);
-	m_removeStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_REMOVE_STUDENT_BTN, wxT("Remove Student"), wxDefaultPosition, wxDefaultSize, 0);
-	m_viewStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_STUDENT_BTN, wxT("View Student"), wxDefaultPosition, wxDefaultSize, 0);
+	m_addStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_ADD_STUDENT_BTN, wxT("Add Student"));
+	m_removeStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_REMOVE_STUDENT_BTN, wxT("Remove Student"));
+	m_viewStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_STUDENT_BTN, wxT("View Student"));
+	m_editStudentMarksBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_EDIT_STUDENT_MARKS_BTN, "Edit Student");
 
 	studentOptionsBSizerInner->Add(m_addStudentBtn, 1, wxALL | wxEXPAND, 5);
 	studentOptionsBSizerInner->Add(m_removeStudentBtn, 1, wxALL | wxEXPAND, 5);
 	studentOptionsBSizerInner->Add(m_viewStudentBtn, 1, wxALL | wxEXPAND, 5);
+	studentOptionsBSizerInner->Add(m_editStudentMarksBtn, 1, wxALL | wxEXPAND, 5);
 
 	studentOptionsSBSizerOuter->Add(studentOptionsBSizerInner, 1, wxEXPAND, 5);
 
@@ -89,14 +92,16 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	enrolStudentsTxtDlg->bSizerInput->Insert(0, new wxFilePickerCtrl(enrolStudentsTxtDlg, ID_ENROL_STUDENTS_TXT_FILEPICKER, wxEmptyString, "Please select a file", "*.txt"), 1, wxALL | wxEXPAND, 5);
 
 
+	EditStudentMarksDlg *editStudentDlg = new EditStudentMarksDlg(this, ID_EDIT_STUDENT_MARKS_DLG);
+
 	this->SetSizer(bSizerParent);
 	this->Layout();
 
 
 	// Create a lambda function to show the dialog upon clicking the corresponding button
 	auto ShowDialog = [this](wxCommandEvent &event) {
-		BasicDataEntryDialog *dialog = (BasicDataEntryDialog *)tool::getCorrespondingWindow(event, this);
-		dialog->bSizerParent->Layout();
+		wxDialog *dialog = (wxDialog *)tool::getCorrespondingWindow(event, this);
+		//dialog->bSizerParent->Layout();
 		dialog->Fit();
 		dialog->Show(true);
 
@@ -110,6 +115,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_REMOVE_STUDENT_BTN);
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_STUDENT_BTN);
+	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_EDIT_STUDENT_MARKS_BTN);
 
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_REMOVE_COURSE_BTN);
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_COURSE_BTN);

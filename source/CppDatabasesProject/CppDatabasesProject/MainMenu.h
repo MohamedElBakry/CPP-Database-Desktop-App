@@ -16,6 +16,7 @@ protected:
 	wxButton* m_addDegreeBtn;
 	wxButton* m_txtEnrolmentBtn;
 	wxButton* m_enrolStudentCourseBtn;
+	wxButton* m_editStudentMarksBtn;
 
 	wxWizard *addStudentWizard;
 	wxWizard *addCourseWizard;

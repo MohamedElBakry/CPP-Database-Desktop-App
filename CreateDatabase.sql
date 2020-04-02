@@ -63,7 +63,7 @@ CREATE TABLE studentsAssessments (
     assessmentID INT NOT NULL,
     mark INT,
     letterGrade VARCHAR(3),
-    concessionalCode CHAR(2),
+    concessionalCode VARCHAR(2),
 
     FOREIGN KEY (studentID) REFERENCES Students(studentID) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (assessmentID) REFERENCES Assessments(assessmentID) ON UPDATE CASCADE ON DELETE RESTRICT
@@ -71,6 +71,38 @@ CREATE TABLE studentsAssessments (
 
 -- Procedures. 
     -- Use CALL [ProcedureName];
+
+-- Get the courses that belong to a student
+DELIMITER //
+
+CREATE PROCEDURE getCoursesOfStudent(IN sid INT)
+BEGIN
+    SELECT courses.courseID, courses.name
+    FROM students
+    INNER JOIN studentscourses
+    ON students.studentID = studentscourses.studentID
+    INNER JOIN courses
+    ON studentscourses.courseID = courses.courseID
+    WHERE students.studentID = sid;
+END//
+
+DELIMITER ;
+
+-- Get the assessments that belong to a student
+DROP PROCEDURE IF EXISTS getAssessmentsOfStudent
+
+DELIMITER //
+CREATE PROCEDURE getAssessmentsOfStudent(IN sid INT, IN cid INT)
+BEGIN
+    SELECT assessments.assessmentID, assessments.name
+    FROM assessments
+    INNER JOIN studentscourses
+    ON studentscourses.courseID = assessments.courseID
+    WHERE studentscourses.studentID = sid
+    AND studentscourses.courseID = cid;
+END//
+
+DELIMITER ;
 
 -- Just use SELECT MAX(studentID) FROM Students WHERE forename = ?;
 DELIMITER //
