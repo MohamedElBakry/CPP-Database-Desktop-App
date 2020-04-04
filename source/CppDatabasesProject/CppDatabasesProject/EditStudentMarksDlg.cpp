@@ -97,7 +97,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	m_staticTextConc->Wrap(-1);
 	bSizerConc->Add(m_staticTextConc, 1, wxALL, 5);
 
-	wxString m_choiceConcChoices[] = { "None", wxT("NS: Non Submission"), wxT("M: Mitigating circumstances"), wxT("PL: Plagiarism"), wxT("FL: Late submission"), wxT("AO: Attendance Only"), wxT("EX: Extension given") };
+	wxString m_choiceConcChoices[] = { "GP: Great Performance", "SP: Standard Performance", wxT("NS: Non Submission"), wxT("M: Mitigating circumstances"), wxT("PL: Plagiarism"), wxT("FL: Late submission"), wxT("AO: Attendance Only"), wxT("EX: Extension given") };
 	int m_choiceConcNChoices = sizeof(m_choiceConcChoices) / sizeof(wxString);
 	m_choiceConc = new wxChoice(sbSizerAs->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceConcNChoices, m_choiceConcChoices, 0);
 	m_choiceConc->SetSelection(0);
@@ -127,11 +127,10 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 	this->Centre(wxBOTH);
 
-	MySQL *mySQL = new MySQL();
 	wxNumberEntryDialog *studentIDEntry = new wxNumberEntryDialog(this, "Please enter the student's ID you wish to edit", "Student ID", "Edit Student Marks", 1, 1, 2147483647);
 	
 	// Lambda functions to be bound to events
-	auto OnInitFnc = [this, mySQL, studentIDEntry](wxInitDialogEvent &event) {
+	auto OnInitFnc = [this, studentIDEntry](wxInitDialogEvent &event) {
 
 		studentIDEntry->ShowModal(); // Show the Dialog
 		int studentID = studentIDEntry->GetValue(); // Store the value
@@ -140,6 +139,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		
 		// Get the student's current enroled course and asseessment
 		SQL_START
+		MySQL *mySQL = new MySQL();
 
 		mySQL->pstmt = mySQL->conn->prepareStatement("CALL getCoursesOfStudent(?)");
 		mySQL->pstmt->setInt(1, studentID);
@@ -172,8 +172,8 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		int courseID = std::stoi(boost::split(splitCourse, selectedCourse, boost::is_any_of(":")).at(0));
 		SQL_START
 
-			//Get the assessments of that course for that student
-			MySQL *mySQL = new MySQL();
+		//Get the assessments of that course for that student
+		MySQL *mySQL = new MySQL();
 
 		mySQL->pstmt = mySQL->conn->prepareStatement("CALL getAssessmentsOfStudent(?, ?)");
 		mySQL->pstmt->setInt(1, this->studentID);
@@ -198,7 +198,12 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	};
 
 	// If OK is clicked, get the data from the fields and update the database
-	auto OnOKClicked = [this, mySQL](wxCommandEvent &event) {
+	auto OnOKClicked = [this](wxCommandEvent &event) {
+		if (wxMessageDialog(this, "Are you sure you wish to overwrite the current data?", "Confirm Data Overwrite", wxICON_QUESTION | wxYES_NO).ShowModal() == wxID_NO) {
+			wxMessageBox("Overwrite ignored. No edits have been made.", "Overwrite Vetoed", wxICON_INFORMATION, this);
+			event.Skip();
+			return;
+		}
 		std::vector<std::string> buffer;
 		// Get
 		// Course ID
@@ -207,7 +212,6 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		std::string selectedCourseChoice(this->m_choiceCourses->GetStringSelection());
 
 		std::string courseID = boost::split(buffer, selectedCourseChoice, boost::is_any_of(":")).at(0);
-		//int courseMarks = this->m_spinCtrlCourseMarks->GetValue();
 		std::string progressionCode(this->m_textCtrlPrgC->GetValue());
 
 		// Assessment ID
@@ -215,29 +219,34 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		// Concessional Codes
 		std::string selectedAsessmentChoice(this->m_choiceAs->GetStringSelection());
 		std::string assessmentID = boost::split(buffer, selectedAsessmentChoice, boost::is_any_of(":")).at(0);
-		int assessmentMark = this->m_spinCtrlAsMark->GetValue();
-		std::string concessionalCode(this->m_choiceConc->GetStringSelection()); // TODO split this and get first 2 letters.
 
+		int assessmentMark = this->m_spinCtrlAsMark->GetValue();
+
+		std::string fullConcessionalCode(this->m_choiceConc->GetStringSelection());
+		std::string concessionalCode = boost::split(buffer, fullConcessionalCode, boost::is_any_of(":")).at(0); 
+		wxMessageBox(concessionalCode);
 		SQL_START
+		MySQL *mySQL = new MySQL();
 		// TODO: Allow Trigger to run and convert numerical mark into letter grade
 		// TODO: Allow another Trigger to run and generate letter grade for course if all assessments are marked
 
 		// INSERT course data into studentsCourse 
-		mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
-		mySQL->pstmt->setInt(1, this->studentID);
-		mySQL->pstmt->setString(2, courseID.c_str());
+		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE studentsCourses SET progressionCode=? WHERE studentID=? AND courseID=?");
+		mySQL->pstmt->setString(1, progressionCode.c_str());
+		mySQL->pstmt->setInt(2, this->studentID);
+		mySQL->pstmt->setString(3, courseID.c_str());
 		mySQL->pstmt->execute();
 
 		// INSERT course data into studentsAssessment
-		mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsAssessments (studentID, asessmentID, mark, concessionalCode) VALUES (?, ?, ?, ?)");
-		mySQL->pstmt->setInt(1, this->studentID);
-		mySQL->pstmt->setString(2, assessmentID.c_str());
-		mySQL->pstmt->setInt(3, assessmentMark);
-		mySQL->pstmt->setInt(4, this->studentID);
-
+		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE studentsAssessments SET mark=?, concessionalCode=? WHERE studentID=? AND assessmentID=? ");
+		mySQL->pstmt->setInt(3, this->studentID);
+		mySQL->pstmt->setString(4, assessmentID.c_str());
+		mySQL->pstmt->setInt(1, assessmentMark);
+		mySQL->pstmt->setString(2, concessionalCode.c_str());
+		if(!mySQL->pstmt->execute())
+			wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
 
 		SQL_END
-		wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
 		event.Skip();
 	};
 
