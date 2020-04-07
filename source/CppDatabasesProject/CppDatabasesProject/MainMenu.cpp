@@ -72,16 +72,54 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	
 	BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)");
 	viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
+
+
+	// TODO: see why this makes the home frame smaller.
 	SQL_START
 	MySQL *mySQL = new MySQL();
+	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
+	int numRows = mySQL->res->rowsCount();
 	
-	SQL_END
 	// Create the grid
 	wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
 	// Set its rows to correspond to the database
-	studentGridView->CreateGrid(7, 7);
-	studentGridView->SetColLabelValue(1, "StudentID");
+	studentGridView->CreateGrid(numRows, 11);
+
+	studentGridView->SetColLabelValue(0, "StudentID");
+	studentGridView->SetColLabelValue(1, "Forename");
+	studentGridView->SetColLabelValue(2, "Surname");
+	studentGridView->SetColLabelValue(3, "Study Level");
+	studentGridView->SetColLabelValue(4, "Degree Name"); // Read only
+	studentGridView->SetColLabelValue(5, "Overall Grade"); // Read only
+	studentGridView->SetColLabelValue(6, "Course Name"); // Read only
+	studentGridView->SetColLabelValue(7, "Course Grade"); // Read only
+	studentGridView->SetColLabelValue(8, "Assessment Name"); // Read only
+	studentGridView->SetColLabelValue(9, "Assessment Mark");
+	studentGridView->SetColLabelValue(10, "Assessment Grade"); // Read only
+
+	int row = 0;
+	int col = 0;
+
+	while (mySQL->res->next()) {
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("studentID").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("forename").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("surname").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("studyLevel").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("degreeName").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("overallGrade").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("courseName").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("courseGrade").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("assessmentName").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("mark").c_str()); col++;
+		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("letterGrade").c_str()); 
+		row++;
+		col = 0;
+	}
+
+	studentGridView->AutoSize();
 	viewStudentsDlg->bSizerInput->Insert(1, studentGridView, 1, wxEXPAND | wxALL);
+
+	SQL_END
 	
 
 	BasicDataEntryDialog *removeCourseDlg = new BasicDataEntryDialog(this, ID_REMOVE_COURSE_DLG, "Remove a Course");

@@ -104,6 +104,31 @@ END//
 
 DELIMITER ;
 
+-- Get students transcript
+DROP PROCEDURE IF EXISTS getStudentsTranscript;
+
+DELIMITER //
+
+CREATE PROCEDURE getStudentsTranscript()
+BEGIN
+    SELECT students.studentID, forename, surname, studyLevel, degreeprograms.name as degreeName, studentsdegrees.overallGrade, courses.name as courseName, studentscourses.letterGrade as courseGrade, assessments.name as assessmentName, studentsassessments.mark, studentsassessments.letterGrade
+    FROM students
+    INNER JOIN studentscourses
+    ON students.studentID = studentscourses.studentID
+    INNER JOIN assessments
+    ON assessments.courseID = studentscourses.courseID
+    INNER JOIN courses
+    ON courses.courseID = studentscourses.courseID
+    INNER JOIN studentsassessments
+    ON studentsassessments.assessmentID = assessments.assessmentID
+	INNER JOIN degreeprograms
+    ON degreeprograms.degreeID = courses.degreeID
+    INNER JOIN studentsdegrees
+    ON studentsdegrees.studentID = studentscourses.studentID;
+END //
+
+DELIMITER ;
+
 -- Just use SELECT MAX(studentID) FROM Students WHERE forename = ?;
 DELIMITER //
 CREATE PROCEDURE getLastSIDFrom (IN fname VARCHAR(35))
@@ -136,7 +161,8 @@ INNER JOIN assessments
 ON assessments.courseID = studentscourses.courseID
 
 -- As above with course and assessment names
-SELECT students.studentID, forename, surname, studyLevel, courses.name, studentscourses.letterGrade, assessments.name, studentsassessments.letterGrade
+
+SELECT students.studentID, forename, surname, studyLevel, degreeprograms.name, studentsdegrees.overallGrade, courses.name, studentscourses.letterGrade, assessments.name, studentsassessments.mark, studentsassessments.letterGrade
 FROM students
 INNER JOIN studentscourses
 ON students.studentID = studentscourses.studentID
@@ -145,7 +171,11 @@ ON assessments.courseID = studentscourses.courseID
 INNER JOIN courses
 ON courses.courseID = studentscourses.courseID
 INNER JOIN studentsassessments
-ON studentsassessments.assessmentID = assessments.assessmentID 
+ON studentsassessments.assessmentID = assessments.assessmentID
+INNER JOIN degreeprograms
+ON degreeprograms.degreeID = courses.degreeID
+INNER JOIN studentsdegrees
+ON studentsdegrees.studentID = studentscourses.studentID
 
 -- INSERT 
 INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID)
