@@ -29,9 +29,9 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	wxBoxSizer* bSizerMark;
 	bSizerMark = new wxBoxSizer(wxHORIZONTAL);
 
-	m_staticTextMark = new wxStaticText(sbSizerCourse->GetStaticBox(), wxID_ANY, wxT("Mark"), wxDefaultPosition, wxDefaultSize, 0);
-	m_staticTextMark->Wrap(-1);
-	bSizerMark->Add(m_staticTextMark, 1, wxALL, 5);
+	//m_staticTextMark = new wxStaticText(sbSizerCourse->GetStaticBox(), wxID_ANY, wxT("Mark"), wxDefaultPosition, wxDefaultSize, 0);
+	//m_staticTextMark->Wrap(-1);
+	//bSizerMark->Add(m_staticTextMark, 1, wxALL, 5);
 
 	// Course marks are calculated through assessments
 	//m_spinCtrlCourseMarks = new wxSpinCtrl(sbSizerCourse->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS);
@@ -132,7 +132,10 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	// Lambda functions to be bound to events
 	auto OnInitFnc = [this, studentIDEntry](wxInitDialogEvent &event) {
 
-		studentIDEntry->ShowModal(); // Show the Dialog
+		if (studentIDEntry->ShowModal() == wxID_CANCEL) { // Show the Dialog
+			event.Skip();
+			return;
+		}
 		int studentID = studentIDEntry->GetValue(); // Store the value
 		
 		this->studentID = studentID;
@@ -199,11 +202,12 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 	// If OK is clicked, get the data from the fields and update the database
 	auto OnOKClicked = [this](wxCommandEvent &event) {
-		if (wxMessageDialog(this, "Are you sure you wish to overwrite the current data?", "Confirm Data Overwrite", wxICON_QUESTION | wxYES_NO).ShowModal() == wxID_NO) {
+		if (wxMessageDialog(this, "Are you sure you wish to overwrite the current data?", "Confirm Data Overwrite", wxYES_NO | wxCANCEL).ShowModal() != wxID_YES) {
 			wxMessageBox("Overwrite ignored. No edits have been made.", "Overwrite Vetoed", wxICON_INFORMATION, this);
 			event.Skip();
 			return;
 		}
+
 		std::vector<std::string> buffer;
 		// Get
 		// Course ID
@@ -225,6 +229,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		std::string fullConcessionalCode(this->m_choiceConc->GetStringSelection());
 		std::string concessionalCode = boost::split(buffer, fullConcessionalCode, boost::is_any_of(":")).at(0); 
 		wxMessageBox(concessionalCode);
+
 		SQL_START
 		MySQL *mySQL = new MySQL();
 		// TODO: Allow Trigger to run and convert numerical mark into letter grade
@@ -239,10 +244,10 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 		// INSERT course data into studentsAssessment
 		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE studentsAssessments SET mark=?, concessionalCode=? WHERE studentID=? AND assessmentID=? ");
-		mySQL->pstmt->setInt(3, this->studentID);
-		mySQL->pstmt->setString(4, assessmentID.c_str());
 		mySQL->pstmt->setInt(1, assessmentMark);
 		mySQL->pstmt->setString(2, concessionalCode.c_str());
+		mySQL->pstmt->setInt(3, this->studentID);
+		mySQL->pstmt->setString(4, assessmentID.c_str());
 		if(!mySQL->pstmt->execute())
 			wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
 

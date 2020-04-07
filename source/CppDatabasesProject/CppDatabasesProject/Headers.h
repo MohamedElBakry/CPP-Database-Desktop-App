@@ -1,6 +1,7 @@
 #pragma once
 #pragma warning ( disable : 4996 )
 
+
 #include <wx/stattext.h>
 #include <wx/statline.h>
 #include <wx/gauge.h>

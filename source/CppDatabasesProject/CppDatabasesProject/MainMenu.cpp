@@ -1,7 +1,7 @@
 #include "EditStudentMarksDlg.h"
 #include "MainMenu.h"
 #include <wx/combobox.h>
-
+#include <wx/grid.h>
 MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name) : wxPanel(parent, id, pos, size, style, name)
 {
 	wxBoxSizer* bSizerParent;
@@ -15,9 +15,9 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	wxBoxSizer* courseOptionsBSizerInner = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* bSizerInnerOtherOptions = new wxBoxSizer(wxVERTICAL);
 
-	m_addStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_ADD_STUDENT_BTN, wxT("Add Student"));
-	m_removeStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_REMOVE_STUDENT_BTN, wxT("Remove Student"));
-	m_viewStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_STUDENT_BTN, wxT("View Student"));
+	m_addStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_ADD_STUDENT_BTN, wxT("Add a Student"));
+	m_removeStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_REMOVE_STUDENT_BTN, wxT("Remove a Student"));
+	m_viewStudentBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_STUDENT_BTN, wxT("View Students"));
 	m_editStudentMarksBtn = new wxButton(studentOptionsSBSizerOuter->GetStaticBox(), ID_ON_EDIT_STUDENT_MARKS_BTN, "Edit Student");
 
 	studentOptionsBSizerInner->Add(m_addStudentBtn, 1, wxALL | wxEXPAND, 5);
@@ -70,8 +70,19 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	removeStudentDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "remove them"));
 	removeStudentDlg->createLabelTextFieldPair("Student ID", -1);
 	
-	BasicDataEntryDialog *viewStudentDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View a Student");
-	viewStudentDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
+	BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)");
+	viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
+	SQL_START
+	MySQL *mySQL = new MySQL();
+
+	SQL_END
+	// Create the grid
+	wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
+	// Set its rows to correspond to the database
+	studentGridView->CreateGrid(7, 7);
+	studentGridView->SetColLabelValue(1, "StudentID");
+	viewStudentsDlg->bSizerInput->Insert(1, studentGridView, 1, wxEXPAND | wxALL);
+	
 
 	BasicDataEntryDialog *removeCourseDlg = new BasicDataEntryDialog(this, ID_REMOVE_COURSE_DLG, "Remove a Course");
 	removeCourseDlg->staticTextMessage->SetLabel(dialogAction("Course's ID", "remove it"));
@@ -88,8 +99,9 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	BasicDataEntryDialog *enrolStudentsTxtDlg = new BasicDataEntryDialog(this, ID_ENROL_STUDENTS_TXT_DLG, "Text File Student Enrolment");
 	enrolStudentsTxtDlg->staticTextMessage->SetLabel("Please Select the Text File containing the student's details");
-	//enrolStudentsTxtDlg->textCtrlInput->Destroy();
 	enrolStudentsTxtDlg->bSizerInput->Insert(0, new wxFilePickerCtrl(enrolStudentsTxtDlg, ID_ENROL_STUDENTS_TXT_FILEPICKER, wxEmptyString, "Please select a file", "*.txt"), 1, wxALL | wxEXPAND, 5);
+
+	//BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)", "Please Enter the Student ID to view them");
 
 
 	// TODO: See why this prevents the program from closing...

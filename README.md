@@ -4,6 +4,8 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 
 ## Self-Notes
+0. Do courses have a variable number of assessments, or are there always 3 assessments?
+
 1. Clear form on load?
 
 2. Read in studentID too from enrol.txt, or generate on INSERT with AUTO_INCREMENT?
@@ -17,13 +19,13 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 7. StudentID foreign key: ON DELETE CASCADE instead of RESTRICT?
 
-8. Remove boost::token_compress_on from boost::split
 
 ## TODO 
-1. Edit student course marks:
-    Get Student ID and registered courses with fields shown below
-    On CourseSelection event, show assessments for that course only...
-    Have a Submit Changes button and ensure fields are not empty.
+1. studentGridView:
+    a. Display all student details/student transcript (to be specified) 
+    b. Allow grid cells to be editted
+    c. Get user confirmation for the changed data
+    d. Iterate over grid cells, get data, and UPDATE the database. 
 
 2. Display student transcript for a specified student.
     a. Course names, Level and Assessment Details with Marks (courses.name, courses.level, assessment.name, assessment.weighting, students.assessments.mark) ?

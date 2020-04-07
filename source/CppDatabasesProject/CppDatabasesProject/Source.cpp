@@ -3,16 +3,6 @@
 
 #include "HomeFrame.h"
 
-//#include "OurSQL.h"
-
-//#include "mysql_connection.h"
-//
-//#include <cppconn/driver.h>
-//#include <cppconn/exception.h>
-//#include <cppconn/resultset.h>
-//#include <cppconn/statement.h>
-//#include <cppconn/prepared_statement.h>
-
 // TODO: Remove forward declaring i.e. 
 // Forward declaring	Not forward declaring
 //	int a;		vs		int a = 1;

@@ -102,7 +102,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	staticTextAssessments->Wrap(-1);
 	bSizerAssessments->Add(staticTextAssessments, 1, wxALL, 5);
 
-	spinCtrlAssessmentsNum = new wxSpinCtrl(wizPageAddData, ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 5);
+	spinCtrlAssessmentsNum = new wxSpinCtrl(wizPageAddData, ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxSP_WRAP, 1, 3, 1);
 	bSizerAssessments->Add(spinCtrlAssessmentsNum, 0, wxALL, 5);
 
 	addAssessmentsBtn = new wxButton(wizPageAddData, wxID_ANY, wxT("Add Assessments"), wxDefaultPosition, wxDefaultSize, 0);
@@ -219,11 +219,13 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 
 		for (int i = 0; i < this->assessmentsVector.capacity(); i++)
 		{
-			BasicDataEntryDialog *assessmentCollector = new BasicDataEntryDialog(this, wxID_ANY, "Course Assessments", "Please enter the following details about the assessment");
+			BasicDataEntryDialog *assessmentCollector = new BasicDataEntryDialog(this, wxID_ANY, (std::string("Assessment #")).append(std::to_string(i+1)), "Please enter the following details about the assessment");
 
 			wxDatePickerCtrl *assessmentDeadline = ((wxDatePickerCtrl *)assessmentCollector->createLabelTextFieldPair("Deadline", -1, new wxDatePickerCtrl(assessmentCollector, wxID_ANY)));
-			wxSpinCtrl *assessmentWeighting = ((wxSpinCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting", -1, new wxSpinCtrl(assessmentCollector, wxID_ANY)));
-			wxTextCtrl *assessmentName = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Name"));
+			wxSpinCtrl *assessmentWeighting = ((wxSpinCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting (%)", -1, new wxSpinCtrl(assessmentCollector, wxID_ANY)));
+			//wxTextCtrl *assessmentName = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Name")); // Simple text box input
+			wxString asessmentNames[] = { "Portfolio", "Coursework", "Exam" }; // Drop down list input
+			wxChoice *assessmentName = ((wxChoice *)assessmentCollector->createLabelTextFieldPair("Name", -1, new wxChoice(assessmentCollector, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, asessmentNames)));
 			assessmentCollector->Show(true);
 			
 			// Bind function to get data inputted once enter is clicked
@@ -236,7 +238,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 				}
 
 				// Using std::stoi here is especially useful as '9abc' will become just 9.
-				struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
+				struct Assessment *assessment = new Assessment(assessmentName->GetStringSelection().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
+				//struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				this->assessmentsVector.push_back(assessment);
 				assessmentCollector->Show(false);
 				wxMessageBox("Assessment successfully inputted!", "Success");
@@ -284,8 +287,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 			this->gaugeLoadingBar->SetValue(20);
 
 			// Get the degreeID by spliting the string of the degreeName which is formatted like "%s: %s", as seen earlier when populating the 'degreeChoiceArray'
-			std::string degreeID = boost::split(splitted, degreeName, boost::is_any_of(":"), boost::token_compress_on).at(0);
-			const char *courseLevelCh = boost::split(splitted, courseLevel, boost::is_any_of("("), boost::token_compress_on).at(0).c_str();
+			std::string degreeID = boost::split(splitted, degreeName, boost::is_any_of(":")).at(0); // Token compress removed
+			const char *courseLevelCh = boost::split(splitted, courseLevel, boost::is_any_of("(")).at(0).c_str(); // Token compress removed
 			this->gaugeLoadingBar->SetValue(30);
 			mySQL->pstmt->setInt(1, std::stoi(degreeID));
 			mySQL->pstmt->setString(2, courseName.c_str());

@@ -1,4 +1,5 @@
 #include "BasicDataEntry.h"
+#include <wx/grid.h>
 
 enum fOffset {
 	forename, surname, dob, studyLevel, resProjName, course1ID, course2ID
@@ -38,7 +39,31 @@ BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxSt
 	this->Centre(wxBOTH);
 
 	Bind(wxEVT_BUTTON, &BasicDataEntryDialog::OnClickEnter, this, (int) buttonEnter->GetId());
+	///
+
+	auto OnShowDlg = [this](wxInitDialogEvent &event) {
+
+		// The following is specified behaviour, so if this isn't the correct dialog, then return.
+		if (this->GetId() != ID_VIEW_STUDENT_DLG)
+			return;
+
+		// Create the grid
+
+
+		//wxGrid *studentGridView = new wxGrid(this, wxID_ANY);
+		//// Create the grid
+		//studentGridView->CreateGrid(7, 7);
+		//studentGridView->SetColLabelValue(1, "StudentID");
+		//// Set its rows to correspond to the database
+		//this->bSizerInput->Insert(0, studentGridView, 1, wxEXPAND | wxALL);
+		//studentGridView->Show(true);
+		//this->bSizerInput->Layout();
+		//this->bSizerParent->Layout();
+	};
+
+	Bind(wxEVT_INIT_DIALOG, OnShowDlg, wxID_ANY);
 }
+
 
 BasicDataEntryDialog::~BasicDataEntryDialog() {}
 
@@ -131,10 +156,10 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
 
 			mySQL->pstmt->setInt(1, studentID);
-			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 5])); // course1ID
+			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + fOffset::course1ID])); // course1ID
 			mySQL->pstmt->execute();
 
-			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + 6])); // cours2ID
+			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + fOffset::course2ID])); // cours2ID
 			mySQL->pstmt->execute();
 
 

@@ -145,6 +145,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 	MySQL *mySQL = new MySQL();
 	mySQL->stmt = mySQL->conn->createStatement();
 	mySQL->res = mySQL->stmt->executeQuery("SELECT courseID, name FROM courses");;
+	
 
 	char *bufferCourse = new char[72];
 	// Fill the buffer with the courseID and course name, then add the buffer to the array, and finally clear the buffer for reuse.
@@ -265,10 +266,10 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			
 			// Prevent the user from continuing if they haven't selected two different courses
 			std::string course1ID(this->choiceCourses1->GetStringSelection());
-			course1ID = boost::split(courseIDVec, course1ID, boost::is_any_of(":"), boost::token_compress_on).at(0);
+			course1ID = boost::split(courseIDVec, course1ID, boost::is_any_of(":")).at(0); // Token compress removed
 
 			std::string course2ID(this->choiceCourses2->GetStringSelection());
-			course2ID = boost::split(courseIDVec, course2ID, boost::is_any_of(":"), boost::token_compress_on).at(0);
+			course2ID = boost::split(courseIDVec, course2ID, boost::is_any_of(":")).at(0); // Token compress removed
 
 			if (course1ID == course2ID) {
 				wxMessageBox("Please select two different courses before proceeding.", "Invalid Course Selection", wxICON_EXCLAMATION);
