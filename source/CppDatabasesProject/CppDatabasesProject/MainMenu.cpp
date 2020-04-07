@@ -2,6 +2,8 @@
 #include "MainMenu.h"
 #include <wx/combobox.h>
 #include <wx/grid.h>
+#include <boost/algorithm/string.hpp>
+
 MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name) : wxPanel(parent, id, pos, size, style, name)
 {
 	wxBoxSizer* bSizerParent;
@@ -78,42 +80,45 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	SQL_START
 	MySQL *mySQL = new MySQL();
 	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
-	int numRows = mySQL->res->rowsCount();
+	const int numRows = mySQL->res->rowsCount();
+	constexpr int numCols = 11;
+	char colNames[numCols][16] = {"studentID", "forename", "surname", "studyLevel", "degreeName", "overallGrade", "courseName", "courseGrade", "assessmentName", "mark", "letterGrade"};
 	
 	// Create the grid
 	wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
-	// Set its rows to correspond to the database
-	studentGridView->CreateGrid(numRows, 11);
 
-	studentGridView->SetColLabelValue(0, "StudentID");
-	studentGridView->SetColLabelValue(1, "Forename");
-	studentGridView->SetColLabelValue(2, "Surname");
-	studentGridView->SetColLabelValue(3, "Study Level");
-	studentGridView->SetColLabelValue(4, "Degree Name"); // Read only
-	studentGridView->SetColLabelValue(5, "Overall Grade"); // Read only
-	studentGridView->SetColLabelValue(6, "Course Name"); // Read only
-	studentGridView->SetColLabelValue(7, "Course Grade"); // Read only
-	studentGridView->SetColLabelValue(8, "Assessment Name"); // Read only
-	studentGridView->SetColLabelValue(9, "Assessment Mark");
-	studentGridView->SetColLabelValue(10, "Assessment Grade"); // Read only
+	// Set its rows to correspond to the database
+	std::string columnName;
+	studentGridView->CreateGrid(numRows, numCols);
+	for (int i = 0; i < numCols; i++) {
+		studentGridView->SetColLabelValue(i, colNames[i]);
+		
+	}
+	//studentGridView->SetColLabelValue(0, "StudentID");
+	//studentGridView->SetColLabelValue(1, "Forename");
+	//studentGridView->SetColLabelValue(2, "Surname");
+	//studentGridView->SetColLabelValue(3, "Study Level");
+	//studentGridView->SetColLabelValue(4, "Degree Name"); // Read only
+	//studentGridView->SetColLabelValue(5, "Overall Grade"); // Read only
+	//studentGridView->SetColLabelValue(6, "Course Name"); // Read only
+	//studentGridView->SetColLabelValue(7, "Course Grade"); // Read only
+	//studentGridView->SetColLabelValue(8, "Assessment Name"); // Read only
+	//studentGridView->SetColLabelValue(9, "Assessment Mark");
+	//studentGridView->SetColLabelValue(10, "Assessment Grade"); // Read only
 
 	int row = 0;
 	int col = 0;
-
+	wxGridCellAttr *readOnly = new wxGridCellAttr();
+	readOnly->SetReadOnly();
+	// TODO: check this colIndex out of bounds
 	while (mySQL->res->next()) {
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("studentID").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("forename").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("surname").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("studyLevel").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("degreeName").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("overallGrade").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("courseName").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("courseGrade").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("assessmentName").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("mark").c_str()); col++;
-		studentGridView->SetCellValue(wxGridCellCoords(row, col), mySQL->res->getString("letterGrade").c_str()); 
+
+		for (int i = 0; i < numCols; i++) {
+
+			//studentGridView->SetColAttr(i, readOnly);
+			studentGridView->SetCellValue(wxGridCellCoords(row, i), mySQL->res->getString(colNames[i]).c_str());
+		} 
 		row++;
-		col = 0;
 	}
 
 	studentGridView->AutoSize();
