@@ -74,7 +74,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
 	SQL_START
 	MySQL *mySQL = new MySQL();
-
+	
 	SQL_END
 	// Create the grid
 	wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);

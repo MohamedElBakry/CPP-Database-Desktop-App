@@ -135,6 +135,18 @@ ON students.studentID = studentscourses.studentID
 INNER JOIN assessments
 ON assessments.courseID = studentscourses.courseID
 
+-- As above with course and assessment names
+SELECT students.studentID, forename, surname, studyLevel, courses.name, studentscourses.letterGrade, assessments.name, studentsassessments.letterGrade
+FROM students
+INNER JOIN studentscourses
+ON students.studentID = studentscourses.studentID
+INNER JOIN assessments
+ON assessments.courseID = studentscourses.courseID
+INNER JOIN courses
+ON courses.courseID = studentscourses.courseID
+INNER JOIN studentsassessments
+ON studentsassessments.assessmentID = assessments.assessmentID 
+
 -- INSERT 
 INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID)
 SELECT s.studentID, a.assessmentID
