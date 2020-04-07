@@ -21,7 +21,8 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 
 ## TODO 
-1. studentGridView:
+
+1. studentGridView: -- TODO: Update data on open
     a. Display all student details/student transcript (to be specified) 
     b. Allow grid cells to be editted
     c. Get user confirmation for the changed data
