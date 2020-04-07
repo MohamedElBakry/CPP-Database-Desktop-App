@@ -238,8 +238,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 				}
 
 				// Using std::stoi here is especially useful as '9abc' will become just 9.
-				struct Assessment *assessment = new Assessment(assessmentName->GetStringSelection().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				//struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
+				struct Assessment *assessment = new Assessment(assessmentName->GetStringSelection().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				this->assessmentsVector.push_back(assessment);
 				assessmentCollector->Show(false);
 				wxMessageBox("Assessment successfully inputted!", "Success");
