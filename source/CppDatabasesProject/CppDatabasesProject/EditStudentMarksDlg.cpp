@@ -271,17 +271,17 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		bool isCalcuatable = true;
 
 		int i = 0;
-		auto metaData = mySQL->res->getMetaData();
-		for (int x = 0; x < sizeof(metaData); x++) {
-		
-		}
 		// TODO: Differentiate between 0 and NULL / SQLNULL
+		char *concessionalCode = new char[2];
 		while (mySQL->res->next()) {
-			marks[i] = mySQL->res->getInt("mark");
-			if (m) {
+			// If the there is no concessional code, then we know that no mark has been applied, and so we shouldn't calculate teh course mark and grade.
+			strcpy(concessionalCode, mySQL->res->getString("concessionalCode").c_str());
+			// 
+			if (strcmp(concessionalCode, "") == 0) {
 				isCalcuatable = false;
 				break;
 			}
+			marks[i] = mySQL->res->getInt("mark");
 			weights[i] = mySQL->res->getInt("weighting");
 			i++;
 		}
@@ -305,7 +305,10 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 			mySQL->pstmt->setInt(1, courseMark);
 			mySQL->pstmt->setInt(2, this->studentID);
 			mySQL->pstmt->setString(3, courseID.c_str());
-			mySQL->pstmt->execute(); 
+			if (!mySQL->pstmt->execute())
+				wxMessageBox("A new course grade has been calculated and stored!", "New Course Grade", wxICON_INFORMATION);
+
+			
 		}
 
 
