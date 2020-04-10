@@ -255,9 +255,10 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		mySQL->pstmt->setString(2, concessionalCode.c_str());
 		mySQL->pstmt->setInt(3, this->studentID);
 		mySQL->pstmt->setString(4, assessmentID.c_str());
-		if(!mySQL->pstmt->execute())
+		if (!mySQL->pstmt->execute())
 			wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
 
+		//mySQL->pstmt = mySQL->conn->prepareStatement("");
 		SQL_END
 		event.Skip();
 	};

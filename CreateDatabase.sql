@@ -96,10 +96,12 @@ DROP PROCEDURE IF EXISTS getAssessmentsOfStudent
 DELIMITER //
 CREATE PROCEDURE getAssessmentsOfStudent(IN sid INT, IN cid INT)
 BEGIN
-    SELECT assessments.assessmentID, assessments.name
+    SELECT assessments.assessmentID, assessments.name, students_assessments.mark
     FROM assessments
     INNER JOIN students_courses
     ON students_courses.courseID = assessments.courseID
+	INNER JOIN students_assessments
+    ON students_assessments.assessmentID = assessments.assessmentID
     WHERE students_courses.studentID = sid
     AND students_courses.courseID = cid;
 END//
@@ -159,22 +161,6 @@ BEGIN
          END IF;
 END//
 
-DELIMITER ;
-
--- Get equivalent letter grade fom mark, and set the grade.
-DROP TRIGGER IF EXISTS OnUpdateAddGrade;
-
-DELIMITER //
- 
-CREATE TRIGGER OnUpdateAddGrade
-    AFTER UPDATE
-    ON students_assessments
-    FOR EACH ROW
-BEGIN
-	CALL markToGrade(new.mark, @grade);
-   	UPDATE students_assessments SET letterGrade = @grade;
-END//   
- 
 DELIMITER ;
 
 -- Just use SELECT MAX(studentID) FROM Students WHERE forename = ?;

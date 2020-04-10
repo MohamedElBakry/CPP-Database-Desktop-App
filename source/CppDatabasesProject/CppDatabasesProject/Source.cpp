@@ -28,7 +28,6 @@ public:
 		/* Set the size of the frame to the size of the panel inside it */
 		frame->Fit();
 		frame->Show(true);
-
 		return true;
 	}
 };
