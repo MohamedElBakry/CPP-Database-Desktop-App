@@ -96,7 +96,7 @@ DROP PROCEDURE IF EXISTS getAssessmentsOfStudent
 DELIMITER //
 CREATE PROCEDURE getAssessmentsOfStudent(IN sid INT, IN cid INT)
 BEGIN
-    SELECT assessments.assessmentID, assessments.name, students_assessments.mark
+    SELECT assessments.assessmentID, assessments.name, students_assessments.mark, assessments.weighting
     FROM assessments
     INNER JOIN students_courses
     ON students_courses.courseID = assessments.courseID

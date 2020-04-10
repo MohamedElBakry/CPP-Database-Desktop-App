@@ -258,7 +258,58 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		if (!mySQL->pstmt->execute())
 			wxMessageBox("Course and Assessment marks for the student have successfully been updated!", "Success", wxICON_INFORMATION);
 
-		//mySQL->pstmt = mySQL->conn->prepareStatement("");
+		// Get all assessment marks
+		mySQL->pstmt = mySQL->conn->prepareStatement("CALL getAssessmentsOfStudent(?, ?)");
+		mySQL->pstmt->setInt(1, this->studentID);
+		mySQL->pstmt->setString(2, courseID.c_str());
+		mySQL->res = mySQL->pstmt->executeQuery();
+
+		// If all assessments have been marked, i.e. they are not NULL, calculate the corresponding course mark and grade.
+		const int numAssessments = mySQL->res->rowsCount();
+		int *marks = new int[numAssessments];
+		int *weights = new int[numAssessments];
+		bool isCalcuatable = true;
+
+		int i = 0;
+		auto metaData = mySQL->res->getMetaData();
+		for (int x = 0; x < sizeof(metaData); x++) {
+		
+		}
+		// TODO: Differentiate between 0 and NULL / SQLNULL
+		while (mySQL->res->next()) {
+			marks[i] = mySQL->res->getInt("mark");
+			if (m) {
+				isCalcuatable = false;
+				break;
+			}
+			weights[i] = mySQL->res->getInt("weighting");
+			i++;
+		}
+
+		// Calculate the course mark and grade
+		float courseMark = 0.0f;
+		float weight;
+		if (isCalcuatable) {
+			for (int j = 0; j < numAssessments; j++) {
+				weight = weights[j] / 100.0f;
+				courseMark += std::ceil(marks[j] * weight);
+			}
+
+			MySQL *mySQL = new MySQL();
+			mySQL->pstmt = mySQL->conn->prepareStatement("CALL markToGrade(?, @grade)");
+			mySQL->pstmt->setInt(1, courseMark);
+			mySQL->pstmt->execute();
+
+			// Update the course mark and grade
+			mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE students_courses SET mark=?, letterGrade = @grade WHERE studentID = ? and courseID = ?");
+			mySQL->pstmt->setInt(1, courseMark);
+			mySQL->pstmt->setInt(2, this->studentID);
+			mySQL->pstmt->setString(3, courseID.c_str());
+			mySQL->pstmt->execute(); 
+		}
+
+
+
 		SQL_END
 		event.Skip();
 	};
