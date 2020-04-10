@@ -122,7 +122,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	wxArrayString degreeChoicesArray;
 	MySQL *mySQL = new MySQL();
 	mySQL->stmt = mySQL->conn->createStatement();
-	mySQL->res = mySQL->stmt->executeQuery("SELECT degreeID, name FROM degreePrograms");;
+	mySQL->res = mySQL->stmt->executeQuery("SELECT degreeID, name FROM degree_programs");;
 
 	char *bufferDegree = new char[72];
 	// Fill the buffer with the degreeID and degree name, then add the buffer to the array, and finally clear the buffer for reuse.
@@ -329,9 +329,14 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 				mySQL->pstmt->setInt(3, assessmentsVector.at(i)->weighting);
 				mySQL->pstmt->setString(4, assessmentsVector.at(i)->deadline);
 
-				mySQL->pstmt->execute();
+				if (mySQL->pstmt->execute()) {
+					wxMessageBox("Unsuccessful Course Submission", "Error", wxICON_ERROR);
+					event.Skip();
+					return;
+				}
 			}
-			
+
+			this->assessmentsVector.clear();
 			this->gaugeLoadingBar->SetValue(100);
 			this->m_staticTextStatus->SetLabel("Complete");
 			wxMessageBox("Your Course and Assessments have been added.", "Success");
@@ -345,7 +350,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 
 		SQL_START
 
-		mySQL->res = mySQL->conn->createStatement()->executeQuery("SELECT degreeID, name FROM degreePrograms");;
+		mySQL->res = mySQL->conn->createStatement()->executeQuery("SELECT degreeID, name FROM degree_programs");;
 
 		char *bufferDegree = new char[72];
 		// Fill the buffer with the degreeID and degree name, then add the buffer to the array, and finally clear the buffer for reuse.

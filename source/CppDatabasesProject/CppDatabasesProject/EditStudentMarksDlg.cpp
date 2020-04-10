@@ -17,7 +17,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	m_staticTextCourse = new wxStaticText(sbSizerCourse->GetStaticBox(), wxID_ANY, wxT("Course"), wxDefaultPosition, wxDefaultSize, 0);
 	m_staticTextCourse->Wrap(-1);
 	bSizerCourse->Add(m_staticTextCourse, 1, wxALL, 5);
-
+	
 	wxArrayString m_choiceCoursesChoices;
 	m_choiceCourses = new wxChoice(sbSizerCourse->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, m_choiceCoursesChoices, 0);
 	m_choiceCourses->SetSelection(0);
@@ -127,7 +127,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 	this->Centre(wxBOTH);
 
-	wxNumberEntryDialog *studentIDEntry = new wxNumberEntryDialog(this, "Please enter the student's ID you wish to edit", "Student ID", "Edit Student Marks", 1, 1, 2147483647);
+	wxNumberEntryDialog *studentIDEntry = new wxNumberEntryDialog(this, "Please enter the student's ID you wish to edit", "Student ID", "Edit Student Marks", 1, 1, MAXINT);
 	
 	// Lambda functions to be bound to events
 	auto OnInitFnc = [this, studentIDEntry](wxInitDialogEvent &event) {
@@ -228,22 +228,29 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 		std::string fullConcessionalCode(this->m_choiceConc->GetStringSelection());
 		std::string concessionalCode = boost::split(buffer, fullConcessionalCode, boost::is_any_of(":")).at(0); 
-		wxMessageBox(concessionalCode);
-
+	
 		SQL_START
 		MySQL *mySQL = new MySQL();
 		// TODO: Allow Trigger to run and convert numerical mark into letter grade
 		// TODO: Allow another Trigger to run and generate letter grade for course if all assessments are marked
 
 		// INSERT course data into studentsCourse 
-		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE studentsCourses SET progressionCode=? WHERE studentID=? AND courseID=?");
+		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE students_courses SET progressionCode=? WHERE studentID=? AND courseID=?");
 		mySQL->pstmt->setString(1, progressionCode.c_str());
 		mySQL->pstmt->setInt(2, this->studentID);
 		mySQL->pstmt->setString(3, courseID.c_str());
 		mySQL->pstmt->execute();
 
 		// INSERT course data into studentsAssessment
-		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE studentsAssessments SET mark=?, concessionalCode=? WHERE studentID=? AND assessmentID=? ");
+
+		// Get the equivalent grade
+		mySQL->pstmt = mySQL->conn->prepareStatement("CALL markToGrade(?, @grade);");
+		mySQL->pstmt->setInt(1, assessmentMark);
+		mySQL->pstmt->execute();
+
+		// Update the data accordingly
+		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE students_assessments SET mark=?, letterGrade=@grade, concessionalCode=? WHERE studentID=? AND assessmentID=?");
+
 		mySQL->pstmt->setInt(1, assessmentMark);
 		mySQL->pstmt->setString(2, concessionalCode.c_str());
 		mySQL->pstmt->setInt(3, this->studentID);
@@ -264,6 +271,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 	Bind(wxEVT_INIT_DIALOG, OnInitFnc);
 
 	Bind(wxEVT_BUTTON, OnOKClicked, wxID_OK);
+
 
 
 

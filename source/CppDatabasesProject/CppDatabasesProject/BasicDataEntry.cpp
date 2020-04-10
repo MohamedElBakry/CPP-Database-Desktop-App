@@ -4,11 +4,12 @@
 enum fOffset {
 	forename, surname, dob, studyLevel, resProjName, course1ID, course2ID
 };
+
 BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxString title, wxString instruction, const wxArtID artID,
 	const wxPoint &pos, const wxSize &size, long style) : wxDialog(parent, id, title, pos, size)
 {	
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
-
+	
 	bSizerParent = new wxBoxSizer(wxVERTICAL);
 
 	wxBoxSizer* bSizerTitle = new wxBoxSizer(wxHORIZONTAL);
@@ -41,31 +42,21 @@ BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxSt
 	Bind(wxEVT_BUTTON, &BasicDataEntryDialog::OnClickEnter, this, (int) buttonEnter->GetId());
 	///
 
-	auto OnShowDlg = [this](wxInitDialogEvent &event) {
+	auto OnShowRefreshGrid = [this](wxInitDialogEvent &event) {
 
 		// The following is specified behaviour, so if this isn't the correct dialog, then return.
 		if (this->GetId() != ID_VIEW_STUDENT_DLG)
 			return;
 
-		// Create the grid
-
-
-		//wxGrid *studentGridView = new wxGrid(this, wxID_ANY);
-		//// Create the grid
-		//studentGridView->CreateGrid(7, 7);
-		//studentGridView->SetColLabelValue(1, "StudentID");
-		//// Set its rows to correspond to the database
-		//this->bSizerInput->Insert(0, studentGridView, 1, wxEXPAND | wxALL);
-		//studentGridView->Show(true);
-		//this->bSizerInput->Layout();
-		//this->bSizerParent->Layout();
 	};
 
-	Bind(wxEVT_INIT_DIALOG, OnShowDlg, wxID_ANY);
+	Bind(wxEVT_INIT_DIALOG, OnShowRefreshGrid, wxID_ANY);
 }
 
 
-BasicDataEntryDialog::~BasicDataEntryDialog() {}
+BasicDataEntryDialog::~BasicDataEntryDialog() {
+	Unbind(wxEVT_BUTTON, &BasicDataEntryDialog::OnClickEnter, this, (int) buttonEnter->GetId());
+}
 
 // Event-triggered methods
 void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
@@ -81,7 +72,7 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 		}
 		SQL_START
 			// Create the prepared statement
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO degreePrograms (name, startDate, endDate) VALUES (?, ?, ?)");
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO degree_programs (name, startDate, endDate) VALUES (?, ?, ?)");
 
 			// Get the necessary data
 			std::string degreeName = ((((wxTextCtrl *)this->GetWindowChild(ID_DEGREE_DLG_NAME))->GetValue()).ToStdString());
@@ -110,10 +101,8 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 		}
 
 		std::string filePath(picker->GetTextCtrlValue());
-		//wxMessageBox(filePath);
-
 		// Get contents
-		auto studentDetails = tool::getContents(filePath.c_str());
+		std::vector<std::string> studentDetails = tool::getContents(filePath.c_str());
 
 		// Iterate over the string vector, and set the placeholders to each of the student details
 		std::string resProjName;
@@ -153,7 +142,7 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			
 			int studentID = mySQL->res->getInt("studentID");
 			// INSERT THE studentCourses data
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_courses (studentID, courseID) VALUES (?, ?)");
 
 			mySQL->pstmt->setInt(1, studentID);
 			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + fOffset::course1ID])); // course1ID
@@ -165,10 +154,10 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 
 			// Enrol the students to the assessments of the courses selected too
 
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID) \
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_assessments (students_assessments.studentID, students_assessments.assessmentID) \
 			SELECT S.studentID, A.assessmentID \
 			FROM Students as S \
-			INNER JOIN studentsCourses as sC \
+			INNER JOIN students_courses as sC \
 			ON S.studentID = sC.studentID \
 			INNER JOIN Assessments as A \
 			ON a.courseID = sC.courseID \

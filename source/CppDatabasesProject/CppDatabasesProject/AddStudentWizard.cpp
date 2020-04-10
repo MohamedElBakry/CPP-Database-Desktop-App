@@ -323,7 +323,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			studentID = mySQL->res->getString("studentID").c_str();
 
 			// Insert both courses into the courses table
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsCourses (studentID, courseID) VALUES (?, ?)");
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_courses (studentID, courseID) VALUES (?, ?)");
 			mySQL->pstmt->setString(1, studentID.c_str());
 			mySQL->pstmt->setString(2, course1ID.c_str());
 			mySQL->pstmt->execute();
@@ -336,10 +336,10 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			// Prepare the statement. Here we add link the student with the assessments that belong to the courses they are enrolled on.
 			SQL_START
 
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsassessments (studentsassessments.studentID, studentsassessments.assessmentID) \
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_assessments (students_assessments.studentID, students_assessments.assessmentID) \
 				SELECT S.studentID, A.assessmentID \
 				FROM Students as S \
-				INNER JOIN studentsCourses as sC \
+				INNER JOIN students_courses as sC \
 				ON S.studentID = sC.studentID \
 				INNER JOIN Assessments as A \
 				ON a.courseID = sC.courseID \
@@ -367,7 +367,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			course2DegreeID = mySQL->res->getInt("degreeID");
 
 			// If both courses belong to the same degree program, then only link up the student and degree once
-			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO studentsDegrees (studentID, degreeID) VALUES (?, ?)");
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_degrees (studentID, degreeID) VALUES (?, ?)");
 			mySQL->pstmt->setString(1, studentID.c_str());
 			mySQL->pstmt->setInt(2, course1DegreeID);
 			mySQL->pstmt->execute();

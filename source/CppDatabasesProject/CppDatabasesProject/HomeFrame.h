@@ -31,5 +31,8 @@ public:
 
 	virtual void OnSwitchPanel(wxCommandEvent &event);
 
+	virtual void OnExit(wxCommandEvent & event);
+
+
 
 };

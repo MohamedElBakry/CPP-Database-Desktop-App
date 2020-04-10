@@ -55,7 +55,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	bSizerParent->Add(studentOptionsSBSizerOuter, 1, wxEXPAND, 5);
 	bSizerParent->Add(courseOptionsSBSizerOuter, 1, wxEXPAND, 5);
 	bSizerParent->Add(sbSizerOtherOptionsOuter, 1, wxEXPAND, 5);
-
+	
 	// Create Wizards
 	addStudentWizard = new AddStudentWizard(this, ID_ADD_STUDENT_WIZARD);
 	addCourseWizard = new AddCourseWizard(this, ID_ADD_COURSE_WIZARD);
@@ -76,7 +76,6 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
 
 
-	// TODO: see why this makes the home frame smaller.
 	SQL_START
 	MySQL *mySQL = new MySQL();
 	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
@@ -84,45 +83,57 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	constexpr int numCols = 11;
 	char colNames[numCols][16] = {"studentID", "forename", "surname", "studyLevel", "degreeName", "overallGrade", "courseName", "courseGrade", "assessmentName", "mark", "letterGrade"};
 	
-	// Create the grid
-	wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
 
-	// Set its rows to correspond to the database
-	std::string columnName;
-	studentGridView->CreateGrid(numRows, numCols);
+	// Create listCtrl
+	wxListCtrl *studentTranscript = new wxListCtrl(viewStudentsDlg, -1, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+
+	// Set the column headings
 	for (int i = 0; i < numCols; i++) {
-		studentGridView->SetColLabelValue(i, colNames[i]);
-		
+		studentTranscript->InsertColumn(i, colNames[i]);
 	}
-	//studentGridView->SetColLabelValue(0, "StudentID");
-	//studentGridView->SetColLabelValue(1, "Forename");
-	//studentGridView->SetColLabelValue(2, "Surname");
-	//studentGridView->SetColLabelValue(3, "Study Level");
-	//studentGridView->SetColLabelValue(4, "Degree Name"); // Read only
-	//studentGridView->SetColLabelValue(5, "Overall Grade"); // Read only
-	//studentGridView->SetColLabelValue(6, "Course Name"); // Read only
-	//studentGridView->SetColLabelValue(7, "Course Grade"); // Read only
-	//studentGridView->SetColLabelValue(8, "Assessment Name"); // Read only
-	//studentGridView->SetColLabelValue(9, "Assessment Mark");
-	//studentGridView->SetColLabelValue(10, "Assessment Grade"); // Read only
 
+	// Insert the data
 	int row = 0;
-	int col = 0;
-	wxGridCellAttr *readOnly = new wxGridCellAttr();
-	readOnly->SetReadOnly();
-	// TODO: check this colIndex out of bounds
 	while (mySQL->res->next()) {
-
+		studentTranscript->InsertItem(row, wxEmptyString);
 		for (int i = 0; i < numCols; i++) {
-
-			//studentGridView->SetColAttr(i, readOnly);
-			studentGridView->SetCellValue(wxGridCellCoords(row, i), mySQL->res->getString(colNames[i]).c_str());
-		} 
+			studentTranscript->SetItem(row, i, mySQL->res->getString(colNames[i]).c_str());
+		}
 		row++;
 	}
 
-	studentGridView->AutoSize();
-	viewStudentsDlg->bSizerInput->Insert(1, studentGridView, 1, wxEXPAND | wxALL);
+	//// Create the grid
+	//wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
+
+
+	//// Set its rows to correspond to the database
+	//std::string columnName;
+	//wxGridCellAttr *readOnly; 
+	//studentGridView->CreateGrid(numRows, numCols);
+	//for (int i = 0; i < numCols; i++) {
+	//	// set the column heading
+	//	studentGridView->SetColLabelValue(i, colNames[i]);
+	//	// Create a read only attribute and give the cell that attribute
+	//	readOnly = new wxGridCellAttr();
+	//	readOnly->SetReadOnly();
+	//	studentGridView->SetColAttr(i, readOnly);
+	//}
+
+	//row = 0;
+	//int col = 0;
+
+	//while (mySQL->res->next()) {
+	//	for (int i = 0; i < numCols; i++) {
+	//		studentGridView->SetCellValue(wxGridCellCoords(row, i), mySQL->res->getString(colNames[i]).c_str());
+	//	} 
+	//	row++;
+	//}
+
+	//studentGridView->AutoSize();
+	////studentGridView->Hide();
+	////viewStudentsDlg->bSizerInput->Insert(0, studentGridView, 1, wxEXPAND | wxALL);
+
+	viewStudentsDlg->bSizerInput->Insert(0, studentTranscript, 1, wxEXPAND | wxALL);
 
 	SQL_END
 	
@@ -157,7 +168,6 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	// Create a lambda function to show the dialog upon clicking the corresponding button
 	auto ShowDialog = [this](wxCommandEvent &event) {
 		wxDialog *dialog = (wxDialog *)tool::getCorrespondingWindow(event, this);
-		//dialog->bSizerParent->Layout();
 		dialog->Fit();
 		dialog->Show(true);
 
@@ -169,7 +179,32 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	Bind(wxEVT_BUTTON, &MainMenu::ShowWizard, this, ID_ON_ADD_COURSE_BTN);
 	Bind(wxEVT_BUTTON, &MainMenu::ShowWizard, this, ID_ON_STUDENT_ENROL_BTN);
 
-	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_REMOVE_STUDENT_BTN);
+	Bind(wxEVT_BUTTON, [this](wxCommandEvent &event) {
+		wxNumberEntryDialog studentIDEntry(this, "Please enter the Student ID to remove them", "Student ID", "Remove a Student", 1, 1, MAXINT);
+		if (studentIDEntry.ShowModal() == wxID_CANCEL) {
+			event.Skip();
+			return;
+		}
+		
+		int studentID = studentIDEntry.GetValue();
+
+		SQL_START
+
+		MySQL *mySQL = new MySQL();
+		mySQL->pstmt = mySQL->conn->prepareStatement("DELETE FROM Students WHERE studentID = ?");
+		mySQL->pstmt->setInt(1, studentID);
+
+		if (mySQL->pstmt->execute()) {
+			wxMessageBox("Unsuccessful Operation. The student has not been removed", "Removal Error", wxICON_ERROR);
+			event.Skip();
+			return;
+		}
+		SQL_END
+
+		wxMessageBox("The student has been successfully removed", "Success");
+		event.Skip();
+	}, ID_ON_REMOVE_STUDENT_BTN);
+
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_STUDENT_BTN);
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_EDIT_STUDENT_MARKS_BTN);
 

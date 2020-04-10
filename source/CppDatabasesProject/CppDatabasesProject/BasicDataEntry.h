@@ -11,6 +11,7 @@ public:
 	wxButton *buttonEnter;
 	wxBoxSizer* bSizerInput;
 	wxBoxSizer *bSizerParent;
+	int studentID;
 	
 
 	// Methods
