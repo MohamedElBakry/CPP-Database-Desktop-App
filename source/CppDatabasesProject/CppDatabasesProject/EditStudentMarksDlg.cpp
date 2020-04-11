@@ -307,11 +307,9 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 			mySQL->pstmt->setString(3, courseID.c_str());
 			if (!mySQL->pstmt->execute())
 				wxMessageBox("A new course grade has been calculated and stored!", "New Course Grade", wxICON_INFORMATION);
-
-			
 		}
 
-
+		/* As with courses, calculate and update their degree mark if possible */
 
 		SQL_END
 		event.Skip();

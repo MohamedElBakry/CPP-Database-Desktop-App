@@ -24,6 +24,7 @@ protected:
 
 
 	virtual void ShowWizard(wxCommandEvent &event);
+	void RemoveCourse(wxCommandEvent &event);
 	//virtual void ShowDialog(wxCommandEvent &event);
 public:
 

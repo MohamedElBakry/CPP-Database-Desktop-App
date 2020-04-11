@@ -32,11 +32,11 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	m_addCourseBtn = new wxButton(courseOptionsSBSizerOuter->GetStaticBox(), ID_ON_ADD_COURSE_BTN, wxT("Add Course"), wxDefaultPosition, wxDefaultSize, 0);
 	m_removeCourseBtn = new wxButton(courseOptionsSBSizerOuter->GetStaticBox(), ID_ON_REMOVE_COURSE_BTN, wxT("Remove Course"), wxDefaultPosition, wxDefaultSize, 0);
-	m_viewCourseBtn = new wxButton(courseOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_COURSE_BTN, wxT("View Course"), wxDefaultPosition, wxDefaultSize, 0);
+	//m_viewCourseBtn = new wxButton(courseOptionsSBSizerOuter->GetStaticBox(), ID_ON_VIEW_COURSE_BTN, wxT("View Course"), wxDefaultPosition, wxDefaultSize, 0);
 
 	courseOptionsBSizerInner->Add(m_addCourseBtn, 1, wxEXPAND | wxALL, 5);
 	courseOptionsBSizerInner->Add(m_removeCourseBtn, 1, wxALL | wxEXPAND, 5);
-	courseOptionsBSizerInner->Add(m_viewCourseBtn, 1, wxALL | wxEXPAND, 5);
+	//courseOptionsBSizerInner->Add(m_viewCourseBtn, 1, wxALL | wxEXPAND, 5);
 
 	courseOptionsSBSizerOuter->Add(courseOptionsBSizerInner, 1, wxEXPAND, 5);
 
@@ -73,19 +73,20 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	removeStudentDlg->createLabelTextFieldPair("Student ID", -1);
 	
 	BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)");
-	viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
+	viewStudentsDlg->staticTextMessage->Hide();
+	//viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
 
 
 	SQL_START
 	MySQL *mySQL = new MySQL();
 	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
 	const int numRows = mySQL->res->rowsCount();
-	constexpr int numCols = 11;
-	char colNames[numCols][16] = {"studentID", "forename", "surname", "studyLevel", "degreeName", "overallGrade", "courseName", "courseGrade", "assessmentName", "mark", "letterGrade"};
+	constexpr int numCols = 10;
+	char colNames[numCols][16] = {"studentID", "forename", "surname", "degree", "overallGrade", "course", "grade", "assessment", "mark", "letterGrade"};
 	
 
 	// Create listCtrl
-	wxListCtrl *studentTranscript = new wxListCtrl(viewStudentsDlg, -1, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+	wxListCtrl *studentTranscript = new wxListCtrl(viewStudentsDlg, ID_STUDENT_TRANSCRIPT_LISTCTRL, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
 
 	// Set the column headings
 	for (int i = 0; i < numCols; i++) {
@@ -104,8 +105,6 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	//// Create the grid
 	//wxGrid *studentGridView = new wxGrid(viewStudentsDlg, wxID_ANY);
-
-
 	//// Set its rows to correspond to the database
 	//std::string columnName;
 	//wxGridCellAttr *readOnly; 
@@ -118,31 +117,30 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	//	readOnly->SetReadOnly();
 	//	studentGridView->SetColAttr(i, readOnly);
 	//}
-
 	//row = 0;
 	//int col = 0;
-
 	//while (mySQL->res->next()) {
 	//	for (int i = 0; i < numCols; i++) {
 	//		studentGridView->SetCellValue(wxGridCellCoords(row, i), mySQL->res->getString(colNames[i]).c_str());
 	//	} 
 	//	row++;
 	//}
-
 	//studentGridView->AutoSize();
 	////studentGridView->Hide();
 	////viewStudentsDlg->bSizerInput->Insert(0, studentGridView, 1, wxEXPAND | wxALL);
 
 	viewStudentsDlg->bSizerInput->Insert(0, studentTranscript, 1, wxEXPAND | wxALL);
+	viewStudentsDlg->buttonEnter->Hide();
+	viewStudentsDlg->Fit();
 
 	SQL_END
 	
 
-	BasicDataEntryDialog *removeCourseDlg = new BasicDataEntryDialog(this, ID_REMOVE_COURSE_DLG, "Remove a Course");
-	removeCourseDlg->staticTextMessage->SetLabel(dialogAction("Course's ID", "remove it"));
+	//BasicDataEntryDialog *removeCourseDlg = new BasicDataEntryDialog(this, ID_REMOVE_COURSE_DLG, "Remove a Course");
+	//removeCourseDlg->staticTextMessage->SetLabel(dialogAction("Course's ID", "remove it"));
 
-	BasicDataEntryDialog *viewCourseDlg = new BasicDataEntryDialog(this, ID_VIEW_COURSE_DLG, "View a Course");
-	viewCourseDlg->staticTextMessage->SetLabel(dialogAction("Course's ID", "view it"));
+	//BasicDataEntryDialog *viewCourseDlg = new BasicDataEntryDialog(this, ID_VIEW_COURSE_DLG, "View a Course");
+	//viewCourseDlg->staticTextMessage->SetLabel(dialogAction("Course's ID", "view it"));
 
 	BasicDataEntryDialog *addDegreeDlg = new BasicDataEntryDialog(this, ID_ADD_DEGREE_DLG, "Add a Degree Program");
 	addDegreeDlg->staticTextMessage->SetLabel(dialogAction("Degree Program's name", "add it"));
@@ -163,6 +161,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	this->SetSizer(bSizerParent);
 	this->Layout();
+	this->Fit();
 
 
 	// Create a lambda function to show the dialog upon clicking the corresponding button
@@ -208,8 +207,8 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_STUDENT_BTN);
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_EDIT_STUDENT_MARKS_BTN);
 
-	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_REMOVE_COURSE_BTN);
-	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_COURSE_BTN);
+	Bind(wxEVT_BUTTON, &MainMenu::RemoveCourse, this, ID_ON_REMOVE_COURSE_BTN);
+	//Bind(wxEVT_BUTTON, ShowDialog, ID_ON_VIEW_COURSE_BTN);
 
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_ADD_DEGREE_BTN);
 	Bind(wxEVT_BUTTON, ShowDialog, ID_ON_ENROL_STUDENTS_TXT_BTN);
@@ -239,5 +238,31 @@ void MainMenu::ShowWizard(wxCommandEvent &event)
 	wizard->GetSizer()->Layout();
 	wizard->Fit();
 	wizard->Update();
+	event.Skip();
+}
+
+void MainMenu::RemoveCourse(wxCommandEvent &event) {
+	wxNumberEntryDialog courseIDEntry(this, "Please enter the Course ID to remove them", "Course ID", "Remove a Course", 1, 1, MAXINT);
+	if (courseIDEntry.ShowModal() == wxID_CANCEL) {
+		event.Skip();
+		return;
+	}
+
+	int courseID = courseIDEntry.GetValue();
+
+	SQL_START
+
+		MySQL *mySQL = new MySQL();
+	mySQL->pstmt = mySQL->conn->prepareStatement("DELETE FROM courses WHERE courseID = ?");
+	mySQL->pstmt->setInt(1, courseID);
+
+	if (mySQL->pstmt->execute()) {
+		wxMessageBox("Unsuccessful Operation. The course has not been removed", "Removal Error", wxICON_ERROR);
+		event.Skip();
+		return;
+	}
+	SQL_END
+
+		wxMessageBox("The course has been successfully removed", "Success");
 	event.Skip();
 }

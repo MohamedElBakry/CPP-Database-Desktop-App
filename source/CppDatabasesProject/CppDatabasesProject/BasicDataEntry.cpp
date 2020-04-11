@@ -1,5 +1,4 @@
 #include "BasicDataEntry.h"
-#include <wx/grid.h>
 
 enum fOffset {
 	forename, surname, dob, studyLevel, resProjName, course1ID, course2ID
@@ -40,25 +39,47 @@ BasicDataEntryDialog::BasicDataEntryDialog(wxWindow *parent, wxWindowID id, wxSt
 	this->Centre(wxBOTH);
 
 	Bind(wxEVT_BUTTON, &BasicDataEntryDialog::OnClickEnter, this, (int) buttonEnter->GetId());
-	///
 
-	auto OnShowRefreshGrid = [this](wxInitDialogEvent &event) {
-
-		// The following is specified behaviour, so if this isn't the correct dialog, then return.
-		if (this->GetId() != ID_VIEW_STUDENT_DLG)
-			return;
-
-	};
-
-	Bind(wxEVT_INIT_DIALOG, OnShowRefreshGrid, wxID_ANY);
+	Bind(wxEVT_INIT_DIALOG, &BasicDataEntryDialog::OnInitRefreshStudentTranscript, this, wxID_ANY);
 }
 
 
 BasicDataEntryDialog::~BasicDataEntryDialog() {
 	Unbind(wxEVT_BUTTON, &BasicDataEntryDialog::OnClickEnter, this, (int) buttonEnter->GetId());
+	Unbind(wxEVT_INIT_DIALOG, &BasicDataEntryDialog::OnInitRefreshStudentTranscript, this, wxID_ANY);
+
 }
 
 // Event-triggered methods
+void BasicDataEntryDialog::OnInitRefreshStudentTranscript(wxInitDialogEvent &event) {
+	if (this->GetId() != ID_VIEW_STUDENT_DLG) {
+		event.Skip();
+		return;
+	}
+
+	SQL_START
+	MySQL *mySQL = new MySQL();
+	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
+	const int numRows = mySQL->res->rowsCount();
+	constexpr int numCols = 10;
+	char colNames[numCols][16] = { "studentID", "forename", "surname", "degree", "overallGrade", "course", "grade", "assessment", "mark", "letterGrade" };
+
+
+	// Get listCtrl
+	wxListCtrl *studentTranscript = (wxListCtrl *) this->GetWindowChild(ID_STUDENT_TRANSCRIPT_LISTCTRL);
+
+	// Insert the data
+	int row = 0;
+	while (mySQL->res->next()) {
+		//studentTranscript->InsertItem(row, wxEmptyString);
+		for (int i = 0; i < numCols; i++) {
+			studentTranscript->SetItem(row, i, mySQL->res->getString(colNames[i]).c_str());
+		}
+		row++;
+	}
+	SQL_END
+}
+
 void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 
 	MySQL *mySQL = new MySQL();
@@ -115,13 +136,14 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			// Prepare an SQL statement for inserting student details
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students (forename, surname, dateOfBirth, studyLevel, resProjName) VALUES (?, ?, ?, ?, ?)");
 
-			mySQL->pstmt->setString(1, studentDetails[i + fOffset::forename ].c_str()); // forename
+			mySQL->pstmt->setString(1, studentDetails[i + fOffset::forename ].c_str()); // forename field
 			mySQL->pstmt->setString(2, studentDetails[i + fOffset::surname].c_str()); // surname
 			mySQL->pstmt->setString(3, studentDetails[i + fOffset::dob].c_str()); // dateOfBirth
 			mySQL->pstmt->setString(4, studentDetails[i + fOffset::studyLevel].c_str()); // studyLevel
 
 			resProjName = studentDetails[i + fOffset::resProjName]; // resProjName. If this student has a research project name, and they're a level H student, set their research project name to be that. Otherwise SQLNULL
-			(resProjName != "none" && studentDetails[i + 3] == "H") ? mySQL->pstmt->setString(5, studentDetails[i + 4].c_str()) : mySQL->pstmt->setNull(5, sql::DataType::SQLNULL);
+			(resProjName != "none" && studentDetails[i + fOffset::studyLevel] == "H") ?
+				mySQL->pstmt->setString(5, studentDetails[i + fOffset::resProjName].c_str()) : mySQL->pstmt->setNull(5, sql::DataType::SQLNULL);
 
 			// Execute the statement
 			if (mySQL->pstmt->execute())
@@ -129,9 +151,11 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 
 			SQL_END
 
-			/* Create a new statement for linking students with their courses */
 
 			SQL_START
+
+
+			/* Create a new statement for linking students with their courses */
 
 			// Get the student ID
 			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
@@ -141,6 +165,8 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			mySQL->res->last();
 			
 			int studentID = mySQL->res->getInt("studentID");
+
+
 			// INSERT THE studentCourses data
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_courses (studentID, courseID) VALUES (?, ?)");
 
@@ -151,6 +177,14 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			mySQL->pstmt->setInt(2, std::stoi(studentDetails[i + fOffset::course2ID])); // cours2ID
 			mySQL->pstmt->execute();
 
+			// INSERT the students_degrees data
+			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_degrees (studentID, degreeID) \
+				SELECT DISTINCT studentID, degreeID FROM courses \
+				INNER JOIN students_courses \
+				ON students_courses.courseID = courses.courseID \
+				WHERE studentID = ?");
+			mySQL->pstmt->setInt(1, studentID);
+			mySQL->pstmt->execute();
 
 			// Enrol the students to the assessments of the courses selected too
 
@@ -167,10 +201,9 @@ void BasicDataEntryDialog::OnClickEnter(wxCommandEvent &event) {
 			mySQL->pstmt->execute();
 
 			SQL_END
-
-			wxMessageBox("The students have been successfully stored, and enroled to the their respective courses", "Success", wxICON_INFORMATION);
 		}
 
+		wxMessageBox("The students have been successfully stored, and enroled to the their respective courses", "Success", wxICON_INFORMATION);
 	}
 			
 

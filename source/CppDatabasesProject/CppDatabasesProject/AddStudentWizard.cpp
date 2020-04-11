@@ -7,7 +7,6 @@
 AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxString& title, const wxString& bitmap_path, const wxPoint& pos, long style)
 {
 
-	//wxBitmap bitmap(wxT("../../../crestSmall312x800.jpg"), wxBITMAP_TYPE_JPEG);
 	this->Create(parent, ID_ADD_STUDENT_WIZARD, title, wxNullBitmap, pos, style);
 	this->SetSize(wxSize(800, 500));
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
@@ -252,7 +251,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 
 	// Event functions
 	auto OnPageChanged = [this, mySQL](wxWizardEvent &event) {
-		// If this is the final page, consider the user done, and begin parsing the data to insert into the database.
+		// If this is the final page, consider the user done, begin parsing the data to insert into the database.
 		if (event.GetPage() == this->wizPageResult) {
 
 			if (this->m_textCtrlFN->IsEmpty() || this->m_textCtrlSN->IsEmpty()) {
@@ -266,10 +265,10 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			
 			// Prevent the user from continuing if they haven't selected two different courses
 			std::string course1ID(this->choiceCourses1->GetStringSelection());
-			course1ID = boost::split(courseIDVec, course1ID, boost::is_any_of(":")).at(0); // Token compress removed
+			course1ID = boost::split(courseIDVec, course1ID, boost::is_any_of(":")).at(0);
 
 			std::string course2ID(this->choiceCourses2->GetStringSelection());
-			course2ID = boost::split(courseIDVec, course2ID, boost::is_any_of(":")).at(0); // Token compress removed
+			course2ID = boost::split(courseIDVec, course2ID, boost::is_any_of(":")).at(0);
 
 			if (course1ID == course2ID) {
 				wxMessageBox("Please select two different courses before proceeding.", "Invalid Course Selection", wxICON_EXCLAMATION);
@@ -296,6 +295,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			mySQL->pstmt->setString(2, surname.c_str());
 			mySQL->pstmt->setString(3, dateOfBirth.c_str());
 			mySQL->pstmt->setString(4, studyLevel.c_str());
+
 			// If the student's level isn't H, insert a NULL instead
 			if (studyLevel != "H")
 				mySQL->pstmt->setNull(5, sql::DataType::SQLNULL);
@@ -316,11 +316,11 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			std::string studentID;
 			// Get the studentID of the most recently added student with the forename above
 			SQL_START
-			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT studentID FROM students WHERE forename=?");
+			mySQL->pstmt = mySQL->conn->prepareStatement("SELECT MAX(studentID) FROM students WHERE forename=?");
 			mySQL->pstmt->setString(1, forename.c_str());
 			mySQL->res = mySQL->pstmt->executeQuery();
-			mySQL->res->last();
-			studentID = mySQL->res->getString("studentID").c_str();
+			mySQL->res->next();
+			studentID = mySQL->res->getString("MAX(studentID)").c_str();
 
 			// Insert both courses into the courses table
 			mySQL->pstmt = mySQL->conn->prepareStatement("INSERT INTO students_courses (studentID, courseID) VALUES (?, ?)");
@@ -375,10 +375,16 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 			if (course1DegreeID != course2DegreeID) {
 				mySQL->pstmt->setInt(2, course2DegreeID);
 				mySQL->pstmt->execute();
-				wxMessageBox("This student is enrolled as a Combined Honours student, as the 2 selected courses do not belong to the same degree.", "Degree Notification");
+				wxMessageBox("This student is enrolled as a Combined Honours student as the 2 selected courses do not belong to the same degree.", "Degree Notification");
 			}
 
+
 			SQL_END
+
+			/* Inform the user of the student's generated ID*/
+			char buffer[36];
+			sprintf(buffer, "The Student's ID is: %s", studentID.c_str());
+			wxMessageBox(buffer, "Student ID");
 
 			m_gauge1->SetValue(100);
 			m_staticTextStatus->SetLabel("Done!");

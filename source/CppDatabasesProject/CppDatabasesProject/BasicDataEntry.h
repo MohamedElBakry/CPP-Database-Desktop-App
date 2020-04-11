@@ -14,8 +14,11 @@ public:
 	int studentID;
 	
 
+
+
 	// Methods
 	virtual void OnClickEnter(wxCommandEvent &event);
+	virtual void OnInitRefreshStudentTranscript(wxInitDialogEvent &event);
 	virtual wxWindow *createLabelTextFieldPair(const char* labelText="", const int textFieldID=-1, wxWindow *item=NULL);
 
 	// Constructor

@@ -21,7 +21,6 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
 
 ## TODO 
 1. Trigger for course marks:
- - If all the assessments of a student are marked, then generate their course mark
  - Then, if all courses are marked, then generate and set their degree mark
 
 2. Display student transcript for a specified student.
@@ -29,4 +28,5 @@ For more details, please see pages 28 - 32 in the [specification](https://live.m
     b. With the Calculated overall aggregate for each level completed (studentsCourses.letterGrade)?
     c. With the Calculated overall degree classification if all levels completed  (studentsDegrees.overallGrade) if Level C, I and H courses entries found 
 
-4. Login Info
+3. Login Info
+

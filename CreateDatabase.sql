@@ -72,7 +72,7 @@ CREATE TABLE students_assessments (
 );
 
 -- Procedures. 
-    -- Use CALL [ProcedureName];
+    -- Useage: CALL [ProcedureName];
 
 -- Get the courses that belong to a student
 DELIMITER //
@@ -115,20 +115,34 @@ DELIMITER //
 
 CREATE PROCEDURE getStudentsTranscript()
 BEGIN
-    SELECT students.studentID, forename, surname, studyLevel, degree_programs.name as degreeName, students_degrees.overallGrade, courses.name as courseName, students_courses.letterGrade as courseGrade, assessments.name as assessmentName, students_assessments.mark, students_assessments.letterGrade
-    FROM students
-    INNER JOIN students_courses
-    ON students.studentID = students_courses.studentID
-    INNER JOIN assessments
-    ON assessments.courseID = students_courses.courseID
-    INNER JOIN courses
-    ON courses.courseID = students_courses.courseID
-    INNER JOIN students_assessments
-    ON students_assessments.assessmentID = assessments.assessmentID
-	INNER JOIN degree_programs
-    ON degree_programs.degreeID = courses.degreeID
-    INNER JOIN students_degrees
-    ON students_degrees.studentID = students_courses.studentID;
+    SELECT DISTINCT
+        s.studentID,
+        forename,
+        surname,
+        dp.name AS degree,
+        sd.overallGrade,
+        c.name AS course,
+        sc.letterGrade as grade,
+        a.name as assessment,
+        sa.mark,
+        sa.letterGrade
+    FROM
+        students AS s
+        
+    INNER JOIN students_courses AS sc
+    ON sc.studentID = s.studentID
+    INNER JOIN courses as c
+    ON c.courseID = sc.courseID
+
+    INNER JOIN degree_programs AS dp
+    ON dp.degreeID = c.degreeID
+    INNER JOIN students_degrees AS sd
+    ON sd.studentID = s.studentID
+
+    INNER JOIN assessments AS a
+    ON a.courseID = sc.courseID
+    INNER JOIN students_assessments AS sa
+    ON sa.assessmentID = a.assessmentID;
 END //
 
 DELIMITER ;
