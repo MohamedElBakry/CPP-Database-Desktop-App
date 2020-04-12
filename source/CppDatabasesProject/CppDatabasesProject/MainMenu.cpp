@@ -87,7 +87,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	// Create listCtrl
 	wxListCtrl *studentTranscript = new wxListCtrl(viewStudentsDlg, ID_STUDENT_TRANSCRIPT_LISTCTRL, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-
+	studentTranscript->Show();
 	// Set the column headings
 	for (int i = 0; i < numCols; i++) {
 		studentTranscript->InsertColumn(i, colNames[i]);

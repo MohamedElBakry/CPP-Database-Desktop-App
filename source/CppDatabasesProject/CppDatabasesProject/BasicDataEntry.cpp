@@ -62,16 +62,25 @@ void BasicDataEntryDialog::OnInitRefreshStudentTranscript(wxInitDialogEvent &eve
 	mySQL->res = mySQL->conn->createStatement()->executeQuery("CALL getStudentsTranscript()");
 	const int numRows = mySQL->res->rowsCount();
 	constexpr int numCols = 10;
-	char colNames[numCols][16] = { "studentID", "forename", "surname", "degree", "overallGrade", "course", "grade", "assessment", "mark", "letterGrade" };
+	char colNames[numCols][16] = { "studentID", "forename", "surname", "degree", "overallGrade", "course", "grade", "assessment", "mark", "letterGrade"};
 
 
 	// Get listCtrl
 	wxListCtrl *studentTranscript = (wxListCtrl *) this->GetWindowChild(ID_STUDENT_TRANSCRIPT_LISTCTRL);
 
+	// Clear all the cells
+	studentTranscript->DeleteAllItems();
+	studentTranscript->DeleteAllColumns();
+	//studentTranscript->ClearAll();
+
+	// Inser the column headings
+	for (int i = 0; i < numCols; i++) {
+		studentTranscript->InsertColumn(i, colNames[i]);
+	}
 	// Insert the data
 	int row = 0;
 	while (mySQL->res->next()) {
-		//studentTranscript->InsertItem(row, wxEmptyString);
+		studentTranscript->InsertItem(row, wxEmptyString);
 		for (int i = 0; i < numCols; i++) {
 			studentTranscript->SetItem(row, i, mySQL->res->getString(colNames[i]).c_str());
 		}

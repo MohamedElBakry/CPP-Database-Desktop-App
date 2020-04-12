@@ -236,7 +236,8 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 
 		// INSERT course data into studentsCourse 
 		mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE students_courses SET progressionCode=? WHERE studentID=? AND courseID=?");
-		mySQL->pstmt->setString(1, progressionCode.c_str());
+		// If the progression code is empty, just insert a NULL instead
+	 	progressionCode == "" ? mySQL->pstmt->setString(1, progressionCode.c_str()) : mySQL->pstmt->setNull(1, sql::DataType::SQLNULL);
 		mySQL->pstmt->setInt(2, this->studentID);
 		mySQL->pstmt->setString(3, courseID.c_str());
 		mySQL->pstmt->execute();
@@ -271,7 +272,6 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		bool isCalcuatable = true;
 
 		int i = 0;
-		// TODO: Differentiate between 0 and NULL / SQLNULL
 		char *concessionalCode = new char[2];
 		while (mySQL->res->next()) {
 			// If the there is no concessional code, then we know that no mark has been applied, and so we shouldn't calculate teh course mark and grade.
@@ -295,7 +295,6 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 				courseMark += std::ceil(marks[j] * weight);
 			}
 
-			MySQL *mySQL = new MySQL();
 			mySQL->pstmt = mySQL->conn->prepareStatement("CALL markToGrade(?, @grade)");
 			mySQL->pstmt->setInt(1, courseMark);
 			mySQL->pstmt->execute();
@@ -307,9 +306,43 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 			mySQL->pstmt->setString(3, courseID.c_str());
 			if (!mySQL->pstmt->execute())
 				wxMessageBox("A new course grade has been calculated and stored!", "New Course Grade", wxICON_INFORMATION);
-		}
 
-		/* As with courses, calculate and update their degree mark if possible */
+			/* As with courses, calculate and update their degree mark if possible */
+
+
+			// Get the degree(s) and courses
+			mySQL->pstmt = mySQL->conn->prepareStatement("CALL getDegreeCoursesOfStudent(?)");
+			mySQL->pstmt->setInt(1, this->studentID);
+			mySQL->res = mySQL->pstmt->executeQuery();
+
+			//  Move result pointer to 1st result
+			int degreeID1, degreeID2, courseID1, courseMark1, courseID2, courseMark2;
+			mySQL->res->next();
+			degreeID1 = mySQL->res->getInt("degreeID");
+			courseID1 = mySQL->res->getInt("courseID");
+			courseMark1 = mySQL->res->getInt("mark");
+
+			// 2nd result
+			mySQL->res->next();
+			degreeID2 = mySQL->res->getInt("degreeID");
+			courseID2 = mySQL->res->getInt("courseID");
+			courseMark2 = mySQL->res->getInt("mark");
+
+			bool isCombined = false;
+			// If they are taking 2 courses for one degree, then degree grade is generated from both courses
+			if (degreeID1 == degreeID2) {
+				mySQL->pstmt = mySQL->conn->prepareStatement("UPDATE students_degrees SET overallGrade = ? WHERE studentID = ?");
+				//mySQL->pstmt->setString(1, );
+				mySQL->pstmt->setInt(2, this->studentID);
+			}
+			// If they are doing a combined degree then both degree grades are just set to the course grade
+
+
+
+			mySQL->pstmt = mySQL->conn->prepareStatement("");
+			mySQL->pstmt = mySQL->conn->prepareStatement("");
+
+		}
 
 		SQL_END
 		event.Skip();

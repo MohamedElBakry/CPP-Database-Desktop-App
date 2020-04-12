@@ -90,6 +90,30 @@ END//
 
 DELIMITER ;
 
+-- Degrees and courses
+
+DELIMITER // 
+CREATE PROCEDURE getCoursesOfStudent(IN sid INT)
+
+BEGIN
+SELECT DISTINCT sd.degreeID, sc.courseID, sc.mark, sc.letterGrade
+    FROM students AS s
+
+    INNER JOIN students_courses AS sc
+    ON sc.studentID = s.studentID
+
+    INNER JOIN courses AS c
+    ON c.courseID = sc.courseID
+
+    INNER JOIN degree_programs AS dp
+    ON dp.degreeID = c.degreeID
+
+    INNER JOIN students_degrees AS sd
+    ON sd.degreeID = dp.degreeID
+
+    WHERE sc.studentID = sid;
+END
+
 -- Get the assessments that belong to a student
 DROP PROCEDURE IF EXISTS getAssessmentsOfStudent
 
@@ -142,7 +166,9 @@ BEGIN
     INNER JOIN assessments AS a
     ON a.courseID = sc.courseID
     INNER JOIN students_assessments AS sa
-    ON sa.assessmentID = a.assessmentID;
+    ON sa.assessmentID = a.assessmentID
+    
+    WHERE sc.mark IS NOT NULL;
 END //
 
 DELIMITER ;
