@@ -291,7 +291,7 @@ EditStudentMarksDlg::EditStudentMarksDlg(wxWindow* parent, wxWindowID id, const 
 		float weight;
 		if (isCalcuatable) {
 			for (int j = 0; j < numAssessments; j++) {
-				weight = weights[j] / 100.0f;
+				weight = weights[j] / 100.0f; 
 				courseMark += std::ceil(marks[j] * weight);
 			}
 

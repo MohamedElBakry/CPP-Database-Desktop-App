@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <string>
-//#include <mysql.h>
 #include <wx/msgdlg.h>
 
 #include "mysql_connection.h"

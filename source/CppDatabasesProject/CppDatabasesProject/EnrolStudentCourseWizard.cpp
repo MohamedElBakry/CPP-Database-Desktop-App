@@ -25,14 +25,6 @@ std::vector<std::string> tool::getContents(const char *filePath) {
 
 EnrolStudentCourseWizard::EnrolStudentCourseWizard(wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style)
 {
-	// Initialise the global OurSQL class for later use by almost all other classes.
-	// This is instead of having to initialise the class every time it is needed in a file, which slows down the program.
-	//try {
-	//	oursql = new OurSQL();
-	//} 
-	//catch (sql::SQLException &e) {
-
-	//}
 
 	this->Create(parent, id, title, bitmap, pos, style);
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);

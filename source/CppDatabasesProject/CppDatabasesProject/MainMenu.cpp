@@ -73,8 +73,7 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 	removeStudentDlg->createLabelTextFieldPair("Student ID", -1);
 	
 	BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)");
-	viewStudentsDlg->staticTextMessage->Hide();
-	//viewStudentsDlg->staticTextMessage->SetLabel(dialogAction("Student's ID", "view them"));
+	viewStudentsDlg->staticTextMessage->SetLabel("Only students whose work has been marked can be viewed.");
 
 
 	SQL_START
@@ -155,8 +154,6 @@ MainMenu::MainMenu(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wx
 
 	//BasicDataEntryDialog *viewStudentsDlg = new BasicDataEntryDialog(this, ID_VIEW_STUDENT_DLG, "View Student(s)", "Please Enter the Student ID to view them");
 
-
-	// TODO: See why this prevents the program from closing...
 	EditStudentMarksDlg *editStudentDlg = new EditStudentMarksDlg(this, ID_EDIT_STUDENT_MARKS_DLG);
 
 	this->SetSizer(bSizerParent);

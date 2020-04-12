@@ -1,12 +1,7 @@
-//#include "Headers.h"
-//#include <mysql.h>
-
 #include "HomeFrame.h"
+#include <wx/textdlg.h>
 
-// TODO: Remove forward declaring i.e. 
-// Forward declaring	Not forward declaring
-//	int a;		vs		int a = 1;
-//	a = 1;
+// Disable warning to '_s' variants of functions
 #pragma warning(disable : 4996)
 
 class MyApp : public wxApp
@@ -17,12 +12,21 @@ public:
 	
 	virtual bool OnInit() {
 
-// TODO: ADD password box for release mode... to secure data
-//#ifndef _DEBUG
-//		wxMessageBox("This is release");
-//#else
-//		wxMessageBox("This is Debug");
-//#endif // _DEBUG
+#ifndef _DEBUG
+		// Disabled in debug mode to allow simpler appplication testing
+		wxPasswordEntryDialog password(NULL, "Password: ", "User Authentication");
+		if (password.ShowModal() == wxID_OK) {
+			if (strcmp(password.GetValue().c_str(), "LlamaDB-LHU") != 0) {
+				wxMessageBox("The password is incorrect. The program will now exit.", "Invalid Password", wxICON_EXCLAMATION);
+				return false;
+			}
+
+		wxMessageBox("Password correct.", "Successful Authentication");
+		}
+		else {
+			return false;
+		}
+#endif // _DEBUG
 		HomeFrame *frame = new HomeFrame(NULL, wxID_ANY, "LHU Database System", wxDefaultPosition, wxSize(800, 600));
 
 		/* Set the size of the frame to the size of the panel inside it */
