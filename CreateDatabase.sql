@@ -1,4 +1,3 @@
-/* Uncomment if needed */
 DROP DATABASE IF EXISTS lhu_db;
 
 CREATE DATABASE lhu_db;
@@ -215,48 +214,3 @@ BEGIN
 END//
 
 DELIMITER ;
-
--- Notable Queries
-
--- Get Students forename and surname with the courses studied:
-SELECT s.studentID, forename, surname, c.name
-FROM students as s
-INNER JOIN students_courses as sc
-ON s.studentID = sc.studentID
-INNER JOIN courses as c
-ON c.courseID = sc.courseID
-
--- Get student details with courses and assessment details. adjust fields after SELECT
-SELECT assessments.assessmentID
-FROM students
-INNER JOIN students_courses
-ON students.studentID = students_courses.studentID
-INNER JOIN assessments
-ON assessments.courseID = students_courses.courseID
-
--- As above with course and assessment names
-
-SELECT students.studentID, forename, surname, studyLevel, degree_programs.name, students_degrees.overallGrade, courses.name, students_courses.letterGrade, assessments.name, students_assessments.mark, students_assessments.letterGrade
-FROM students
-INNER JOIN students_courses
-ON students.studentID = students_courses.studentID
-INNER JOIN assessments
-ON assessments.courseID = students_courses.courseID
-INNER JOIN courses
-ON courses.courseID = students_courses.courseID
-INNER JOIN students_assessments
-ON students_assessments.assessmentID = assessments.assessmentID
-INNER JOIN degree_programs
-ON degree_programs.degreeID = courses.degreeID
-INNER JOIN students_degrees
-ON students_degrees.studentID = students_courses.studentID
-
--- INSERT 
-INSERT INTO students_assessments (students_assessments.studentID, students_assessments.assessmentID)
-SELECT s.studentID, a.assessmentID
-FROM students as S
-INNER JOIN students_courses as sC
-ON S.studentID = sC.studentID
-INNER JOIN assessments as a
-ON a.courseID = sC.courseID
-WHERE S.studentID = ?;

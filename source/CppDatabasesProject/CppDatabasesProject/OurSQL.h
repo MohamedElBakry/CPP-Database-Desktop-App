@@ -29,7 +29,9 @@ public:
 			conn->setSchema(databaseName);
 		}
 		catch (sql::SQLException &e) {
-			wxMessageBox(e.what(), "Database Error", wxICON_ERROR);
+			char buffer[250];
+			sprintf(buffer, "Please turn on the MySQL Server, and create the database using the CreateDatabase.sql file in the root folder of this project: [%s]", e.what());
+			wxMessageBox(buffer, "Database Offline Error", wxICON_ERROR);
 		}
 	}
 
