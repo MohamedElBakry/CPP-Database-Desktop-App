@@ -29,7 +29,7 @@ AddStudentWizard::AddStudentWizard(wxWindow* parent, wxWindowID id, const wxStri
 	staticTextTitle->Wrap(-1);
 	bSizerTitle_PgWelcome->Add(staticTextTitle, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
 
-	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Student' Wizard.\nPlease follow the necessary steps stricitly to add a student."), wxDefaultPosition, wxDefaultSize, 0);
+	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Student' Wizard.\nPlease follow the necessary steps strictly."), wxDefaultPosition, wxDefaultSize, 0);
 	staticTextWelcome->Wrap(-1);
 	bSizerTitle_PgWelcome->Add(staticTextWelcome, 0, wxALL, 5);
 

@@ -202,7 +202,7 @@ END//
 
 DELIMITER ;
 
--- Just use SELECT MAX(studentID) FROM Students WHERE forename = ?;
+-- Get the most recently added student's ID by their  forename 
 DELIMITER //
 CREATE PROCEDURE getLastSIDFrom (IN fname VARCHAR(35))
 BEGIN

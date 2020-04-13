@@ -22,8 +22,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	staticTextTitle->Wrap(-1);
 	bSizer1->Add(staticTextTitle, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
 
-	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps stricitly to add a course."), wxDefaultPosition, wxDefaultSize, 0);
-	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps stricitly to add a course."));
+	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps strictly"), wxDefaultPosition, wxDefaultSize, 0);
+	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps strictly."));
 	staticTextWelcome->Wrap(-1);
 	bSizer1->Add(staticTextWelcome, 0, wxALL, 5);
 

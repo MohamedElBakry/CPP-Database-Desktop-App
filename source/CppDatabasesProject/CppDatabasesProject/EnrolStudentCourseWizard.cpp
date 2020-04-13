@@ -44,8 +44,8 @@ EnrolStudentCourseWizard::EnrolStudentCourseWizard(wxWindow* parent, wxWindowID 
 	staticTextTitle->Wrap(-1);
 	bSizer1->Add(staticTextTitle, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
 
-	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly to enrol a student onto a course."), wxDefaultPosition, wxDefaultSize, 0);
-	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly to enrol a student onto a course."));
+	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps strictly."), wxDefaultPosition, wxDefaultSize, 0);
+	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly."));
 	staticTextWelcome->Wrap(-1);
 	bSizer1->Add(staticTextWelcome, 1, wxALL, 5);
 
