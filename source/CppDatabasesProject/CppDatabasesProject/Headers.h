@@ -1,6 +1,7 @@
 #pragma once
 #pragma warning ( disable : 4996 )
 
+
 #include <wx/stattext.h>
 #include <wx/statline.h>
 #include <wx/gauge.h>
@@ -31,7 +32,7 @@
 WX_DEFINE_ARRAY_PTR(wxWizardPageSimple*, WizardPages);
 
 #define SQL_START try {
-#define SQL_END } catch (sql::SQLException &e) {wxMessageBox(e.what());}
+#define SQL_END } catch (sql::SQLException &e) { wxMessageBox(e.what(), "SQL ERROR", wxICON_ERROR); }
 
 /* Acts as a dictionary or associative array of Button IDs to Panel IDs.
  * Mapping Formula : (ID_ON_BTN + ID_PANELID_START) - 6001, where the ID_PANELID_START is the number of Button IDs + 1
@@ -42,7 +43,7 @@ enum ID {
 
 	ID_ON_BTN_START,
 
-	// IDs which assigned buttons will open wxWizards
+	// IDs whose assigned buttons will open wxWizards
 	ID_ON_HOME_BTN,
 	ID_ON_STUDENT_ENROL_BTN,
 	ID_ON_ADD_STUDENT_BTN,
@@ -51,6 +52,7 @@ enum ID {
 	// wxDialog Buttons
 	ID_ON_REMOVE_STUDENT_BTN,
 	ID_ON_VIEW_STUDENT_BTN,
+	ID_ON_EDIT_STUDENT_MARKS_BTN,
 	ID_ON_REMOVE_COURSE_BTN,
 	ID_ON_VIEW_COURSE_BTN,
 	ID_ON_ADD_DEGREE_BTN,
@@ -68,6 +70,7 @@ enum ID {
 	// wxDialog Corresponding window IDs
 	ID_REMOVE_STUDENT_DLG,
 	ID_VIEW_STUDENT_DLG,
+	ID_EDIT_STUDENT_MARKS_DLG,
 	ID_REMOVE_COURSE_DLG,
 	ID_VIEW_COURSE_DLG,
 	ID_ADD_DEGREE_DLG,
@@ -85,12 +88,13 @@ enum ID {
 
 	ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL,
 
-	ID_ENROL_STUDENTS_TXT_FILEPICKER
+	ID_ENROL_STUDENTS_TXT_FILEPICKER,
+
+	ID_STUDENT_TRANSCRIPT_LISTCTRL
 };
 
 namespace tool {
 	wxWindow *getCorrespondingWindow(const wxCommandEvent &event, wxWindow *callingObject);
-
 	std::vector<std::string> getContents(const char* filePath);
 
 }

@@ -22,8 +22,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	staticTextTitle->Wrap(-1);
 	bSizer1->Add(staticTextTitle, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
 
-	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps stricitly to add a course."), wxDefaultPosition, wxDefaultSize, 0);
-	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps stricitly to add a course."));
+	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps strictly"), wxDefaultPosition, wxDefaultSize, 0);
+	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Add a Course' Wizard.\nPlease follow the necessary steps strictly."));
 	staticTextWelcome->Wrap(-1);
 	bSizer1->Add(staticTextWelcome, 0, wxALL, 5);
 
@@ -102,7 +102,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	staticTextAssessments->Wrap(-1);
 	bSizerAssessments->Add(staticTextAssessments, 1, wxALL, 5);
 
-	spinCtrlAssessmentsNum = new wxSpinCtrl(wizPageAddData, ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 5);
+	spinCtrlAssessmentsNum = new wxSpinCtrl(wizPageAddData, ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS | wxSP_WRAP, 1, 3, 1);
 	bSizerAssessments->Add(spinCtrlAssessmentsNum, 0, wxALL, 5);
 
 	addAssessmentsBtn = new wxButton(wizPageAddData, wxID_ANY, wxT("Add Assessments"), wxDefaultPosition, wxDefaultSize, 0);
@@ -122,7 +122,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	wxArrayString degreeChoicesArray;
 	MySQL *mySQL = new MySQL();
 	mySQL->stmt = mySQL->conn->createStatement();
-	mySQL->res = mySQL->stmt->executeQuery("SELECT degreeID, name FROM degreePrograms");;
+	mySQL->res = mySQL->stmt->executeQuery("SELECT degreeID, name FROM degree_programs");;
 
 	char *bufferDegree = new char[72];
 	// Fill the buffer with the degreeID and degree name, then add the buffer to the array, and finally clear the buffer for reuse.
@@ -211,7 +211,7 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	/* User defined event functions */
 
 	// Create and customise a dialog box to get the assessment data, and store it in a member vector of this class
-	auto OnAddAssessments = [this, mySQL](wxCommandEvent &event) {
+	OnAddAssessments = [this, mySQL](wxCommandEvent &event) {
 
 		unsigned const int numAssessments = ((wxSpinCtrl *)this->GetWindowChild(ID_ADD_COURSE_WIZ_ASSESSMENTS_SPINCTRL))->GetValue();
 		this->assessmentsVector.clear();
@@ -219,17 +219,27 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 
 		for (int i = 0; i < this->assessmentsVector.capacity(); i++)
 		{
-			BasicDataEntryDialog *assessmentCollector = new BasicDataEntryDialog(this, wxID_ANY, "Course Assessments", "Please enter the following details about the assessment");
+			BasicDataEntryDialog *assessmentCollector = new BasicDataEntryDialog(this, wxID_ANY, (std::string("Assessment #")).append(std::to_string(i+1)), "Please enter the following details about the assessment");
 
 			wxDatePickerCtrl *assessmentDeadline = ((wxDatePickerCtrl *)assessmentCollector->createLabelTextFieldPair("Deadline", -1, new wxDatePickerCtrl(assessmentCollector, wxID_ANY)));
-			wxTextCtrl *assessmentWeighting = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting"));
-			wxTextCtrl *assessmentName = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Name"));
+			wxSpinCtrl *assessmentWeighting = ((wxSpinCtrl *)assessmentCollector->createLabelTextFieldPair("Weighting (%)", -1, new wxSpinCtrl(assessmentCollector, wxID_ANY)));
+			//wxTextCtrl *assessmentName = ((wxTextCtrl *)assessmentCollector->createLabelTextFieldPair("Name")); // Simple text box input
+			wxString asessmentNames[] = { "Portfolio", "Coursework", "Exam" }; // Drop down list input
+			wxChoice *assessmentName = ((wxChoice *)assessmentCollector->createLabelTextFieldPair("Name", -1, new wxChoice(assessmentCollector, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, asessmentNames)));
 			assessmentCollector->Show(true);
-
+			
 			// Bind function to get data inputted once enter is clicked
 			assessmentCollector->Bind(wxEVT_BUTTON, [this, assessmentCollector, assessmentName, assessmentWeighting, assessmentDeadline](wxCommandEvent &event) {
+
+				if (assessmentName->IsEmpty() || assessmentWeighting->GetValue() == 0) {
+					wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+					event.Skip();
+					return;
+				}
+
 				// Using std::stoi here is especially useful as '9abc' will become just 9.
-				struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), std::stoi(assessmentWeighting->GetValue().ToStdString().c_str()), assessmentDeadline->GetValue().FormatISODate().c_str());
+				//struct Assessment *assessment = new Assessment(assessmentName->GetValue().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
+				struct Assessment *assessment = new Assessment(assessmentName->GetStringSelection().c_str(), assessmentWeighting->GetValue(), assessmentDeadline->GetValue().FormatISODate().c_str());
 				this->assessmentsVector.push_back(assessment);
 				assessmentCollector->Show(false);
 				wxMessageBox("Assessment successfully inputted!", "Success");
@@ -242,11 +252,20 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 	};
 
 	// Check which page we are on. Being on the final page will start the data processing and colllection.
-	auto OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
+	OnPageChanged = [this, mySQL, wizPageResult](wxWizardEvent &event) {
 		if (event.GetPage() == wizPageResult) {
 			std::vector<std::string> splitted;
 			splitted.reserve(3);
 
+			
+			if (this->courseNameTextCtrl->IsEmpty()) {
+				wxMessageBox("Please fill in all fields before continuing.", "Empty Field(s)", wxICON_EXCLAMATION);
+				event.Skip();
+				this->gaugeLoadingBar->SetValue(0);
+				return;
+			}
+
+			// Get the sum of the assessment weights, and take preventative action if the sum is not 100
 			int sumOfWeights = 0;
 			std::for_each(this->assessmentsVector.begin(), this->assessmentsVector.end(), [&sumOfWeights](Assessment *assessment) {
 				sumOfWeights += assessment->weighting;
@@ -268,8 +287,8 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 			this->gaugeLoadingBar->SetValue(20);
 
 			// Get the degreeID by spliting the string of the degreeName which is formatted like "%s: %s", as seen earlier when populating the 'degreeChoiceArray'
-			std::string degreeID = boost::split(splitted, degreeName, boost::is_any_of(":"), boost::token_compress_on).at(0);
-			const char *courseLevelCh = boost::split(splitted, courseLevel, boost::is_any_of("("), boost::token_compress_on).at(0).c_str();
+			std::string degreeID = boost::split(splitted, degreeName, boost::is_any_of(":")).at(0); // Token compress removed
+			const char *courseLevelCh = boost::split(splitted, courseLevel, boost::is_any_of("(")).at(0).c_str(); // Token compress removed
 			this->gaugeLoadingBar->SetValue(30);
 			mySQL->pstmt->setInt(1, std::stoi(degreeID));
 			mySQL->pstmt->setString(2, courseName.c_str());
@@ -310,9 +329,14 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 				mySQL->pstmt->setInt(3, assessmentsVector.at(i)->weighting);
 				mySQL->pstmt->setString(4, assessmentsVector.at(i)->deadline);
 
-				mySQL->pstmt->execute();
+				if (mySQL->pstmt->execute()) {
+					wxMessageBox("Unsuccessful Course Submission", "Error", wxICON_ERROR);
+					event.Skip();
+					return;
+				}
 			}
-			
+
+			this->assessmentsVector.clear();
 			this->gaugeLoadingBar->SetValue(100);
 			this->m_staticTextStatus->SetLabel("Complete");
 			wxMessageBox("Your Course and Assessments have been added.", "Success");
@@ -321,18 +345,47 @@ AddCourseWizard::AddCourseWizard(wxWindow* parent, wxWindowID id, const wxString
 		event.Skip();
 	};
 
+	auto OnShowRefreshDegrees = [this, mySQL](wxShowEvent &event) {
+		wxArrayString degreeChoicesArray;
+
+		SQL_START
+
+		mySQL->res = mySQL->conn->createStatement()->executeQuery("SELECT degreeID, name FROM degree_programs");;
+
+		char *bufferDegree = new char[72];
+		// Fill the buffer with the degreeID and degree name, then add the buffer to the array, and finally clear the buffer for reuse.
+		while (mySQL->res->next()) {
+			sprintf(bufferDegree, "%s: %s", mySQL->res->getString("degreeID").c_str(), mySQL->res->getString("name").c_str());
+			degreeChoicesArray.Add(bufferDegree);
+			memset(bufferDegree, 0, sizeof(bufferDegree));
+		}
+
+		SQL_END
+
+
+		// Set the choices available to be the wxArrayString of degrees from the database
+		this->choiceDegrees->Set(degreeChoicesArray);
+
+		// Set a placeholder degree selection
+		this->choiceDegrees->SetSelection(0);
+		event.Skip();
+	};
+
 	// Function event-binding
+	Bind(wxEVT_SHOW, OnShowRefreshDegrees);
 	Bind(wxEVT_BUTTON, OnAddAssessments, addAssessmentsBtn->GetId());
 	Bind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged, wxID_ANY); // Bind for when the data is filled and we need to begin executing the relevant SQL
 
 	// Connect Events
-	this->Connect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra)); // Connected event for when allowi
-
-	//this->RunWizard(wizPageWelcome);
+	this->Connect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra)); 
 }
 
 AddCourseWizard::~AddCourseWizard()
 {
+	// Unbind events
+	Unbind(wxEVT_BUTTON, OnAddAssessments);
+	Unbind(wxEVT_WIZARD_PAGE_CHANGED, OnPageChanged);
+
 	// Disconnect Events
 	this->Disconnect(wxID_ANY, wxEVT_WIZARD_PAGE_CHANGING, wxWizardEventHandler(AddCourseWizard::studyLevelExtra));
 	assessmentsVector.clear();

@@ -25,14 +25,14 @@ HomeFrame::HomeFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	mainMenu = new MainMenu(this, wxID_ANY);
 	mainMenu->Show(true);
 
-	//Bind(wxEVT_BUTTON, &HomeFrame::OnSwitchPanel, this, ID_ON_ADD_STUDENT_OPT_BTN);
-	//Bind(wxEVT_MENU, &HomeFrame::OnExit, this, wxID_EXIT);
-	//Bind(wxEVT_MENU, &HomeFrame::OnSwitchPanel, this, ID_ON_HOME_BTN);  // This binding refers to the Home menu item in the menu bar.
-	//Bind(wxEVT_BUTTON, &HomeFrame::OnSwitchPanel, this, ID_ON_HOME_BTN);  // This binding refers to the goHomeBitmapBtn in the AddStudent Panel Class, and is seperate from the binding above.
+	//Bind(wxEVT_CLOSE_WINDOW, &HomeFrame::OnExit, this, wxID_EXIT);
+	Bind(wxEVT_MENU, &HomeFrame::OnExit, this, wxID_EXIT);
+
 }
 
 HomeFrame::~HomeFrame()
 {
+	this->Close();
 	/* Clean up & unbind events on deconstruction */
 
 }
@@ -75,5 +75,10 @@ void HomeFrame::OnSwitchPanel(wxCommandEvent &event) {
 	//this->Fit();
 	//choosenChild->Update();
 	this->bSizerPanel->Layout(); // Fixes issue of panels being too small or large after switching to them, however, causes user resizing to be forgotten.
+	event.Skip();
+}
+
+void HomeFrame::OnExit(wxCommandEvent &event) {
+	this->Close();
 	event.Skip();
 }

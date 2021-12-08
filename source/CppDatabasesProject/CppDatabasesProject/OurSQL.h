@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <string>
-//#include <mysql.h>
 #include <wx/msgdlg.h>
 
 #include "mysql_connection.h"
@@ -12,7 +10,7 @@
 #include <cppconn/statement.h>
 #include <cppconn/prepared_statement.h>
 
-/* Class OurSQL */
+/* Class MySQL */
 class MySQL
 {
 
@@ -31,7 +29,9 @@ public:
 			conn->setSchema(databaseName);
 		}
 		catch (sql::SQLException &e) {
-			wxMessageBox(e.what(), "Database Error: Please Activate the Server", wxICON_ERROR);
+			char buffer[250];
+			sprintf(buffer, "Please turn on the MySQL Server, and create the database using the CreateDatabase.sql file in the root folder of this project: [%s]", e.what());
+			wxMessageBox(buffer, "Database Offline Error", wxICON_ERROR);
 		}
 	}
 

@@ -14,27 +14,17 @@ std::vector<std::string> tool::getContents(const char *filePath) {
 	std::vector<std::string> contents;
 	std::ifstream file(filePath);
 	std::string value;
-
+	
 	while (file.good()) {
 		std::getline(file, value, ','); // Read in a string until a ',' is found
 		boost::algorithm::trim(value); // Remove white space
 		contents.push_back(value);
-		//wxMessageBox(value);
 	}
-	wxMessageBox(std::to_string(contents.size()));
 	return contents;
 }
 
 EnrolStudentCourseWizard::EnrolStudentCourseWizard(wxWindow* parent, wxWindowID id, const wxString& title, const wxBitmap& bitmap, const wxPoint& pos, long style)
 {
-	// Initialise the global OurSQL class for later use by almost all other classes.
-	// This is instead of having to initialise the class every time it is needed in a file, which slows down the program.
-	//try {
-	//	oursql = new OurSQL();
-	//} 
-	//catch (sql::SQLException &e) {
-
-	//}
 
 	this->Create(parent, id, title, bitmap, pos, style);
 	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
@@ -54,8 +44,8 @@ EnrolStudentCourseWizard::EnrolStudentCourseWizard(wxWindow* parent, wxWindowID 
 	staticTextTitle->Wrap(-1);
 	bSizer1->Add(staticTextTitle, 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 5);
 
-	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly to enrol a student onto a course."), wxDefaultPosition, wxDefaultSize, 0);
-	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly to enrol a student onto a course."));
+	staticTextWelcome = new wxStaticText(wizPageWelcome, wxID_ANY, wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps strictly."), wxDefaultPosition, wxDefaultSize, 0);
+	staticTextWelcome->SetLabelMarkup(wxT("\nWelcome to the 'Enrol a Student to a Course' Wizard.\nPlease follow the necessary steps stricitly."));
 	staticTextWelcome->Wrap(-1);
 	bSizer1->Add(staticTextWelcome, 1, wxALL, 5);
 

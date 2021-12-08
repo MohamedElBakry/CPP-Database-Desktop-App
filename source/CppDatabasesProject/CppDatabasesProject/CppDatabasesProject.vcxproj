@@ -102,7 +102,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WXUSINGDLL;wxMSVC_VERSION_AUTO;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;WXUSINGDLL;wxMSVC_VERSION_AUTO;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WXUSINGDLL;wxMSVC_VERSION_AUTO;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>../../Libs/wxWidgets/include/msvc;../../Libs/wxWidgets/include;../../Libs/Boost/boost_1_55_0;../../Libs/MySQL/Connector C++ 1.1/include;../../Libs/MySQL/MySQL Server 8.0/include</AdditionalIncludeDirectories>
     </ClCompile>
@@ -156,6 +156,7 @@
     <ClCompile Include="AddCourseWizard.cpp" />
     <ClCompile Include="AddStudentWizard.cpp" />
     <ClCompile Include="BasicDataEntry.cpp" />
+    <ClCompile Include="EditStudentMarksDlg.cpp" />
     <ClCompile Include="EnrolStudentCourseWizard.cpp" />
     <ClCompile Include="HomeFrame.cpp" />
     <ClCompile Include="MainMenu.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="AddCourseWizard.h" />
     <ClInclude Include="AddStudentWizard.h" />
     <ClInclude Include="BasicDataEntry.h" />
+    <ClInclude Include="EditStudentMarksDlg.h" />
     <ClInclude Include="EnrolStudentCourseWizard.h" />
     <ClInclude Include="Headers.h" />
     <ClInclude Include="HomeFrame.h" />
